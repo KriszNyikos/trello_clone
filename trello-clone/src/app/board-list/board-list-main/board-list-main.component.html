@@ -1,0 +1,20 @@
+<div class="board-list-body list-boundary">
+    <h3>
+        Board list box
+    </h3>
+    
+    <div *ngIf='boards'>
+        <div class="board-list-container" cdkDropListOrientation="horizontal"  cdkDropList (cdkDropListDropped)="drop($event)">
+                <app-board-item *ngFor="let item of store.boardList | async" cdkDrag  [item]="item" (delete)="deleteBoard($event)" ></app-board-item>
+            
+        </div>
+
+            <mat-card>
+                <mat-card-content (click)="newBoard()">
+                    Add new board
+                </mat-card-content>
+             
+            </mat-card>
+    </div>
+    
+</div>

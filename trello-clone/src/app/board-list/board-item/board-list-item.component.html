@@ -1,0 +1,14 @@
+<mat-card *ngIf="item">
+    <mat-card-subtitle>
+        {{item.name}}
+    </mat-card-subtitle>
+
+    <mat-card-content>
+        {{item.description}}
+    </mat-card-content>
+  
+    <mat-card-actions>
+        <button mat-raised-button color="primary">Show</button>
+        <button mat-raised-button color="secondary" (click)="deleteBoard()">Delete</button>
+    </mat-card-actions>
+</mat-card>

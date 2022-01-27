@@ -1,0 +1,26 @@
+<h1 mat-dialog-title>Add new board</h1>
+<div mat-dialog-content>
+
+    <form class="new-board-form">
+        <mat-form-field appearance="fill">
+          <mat-label>Favorite food</mat-label>
+          <input matInput [(ngModel)]="fields.name" name="name" placeholder="Ex. Pizza" >
+        </mat-form-field>
+      
+        <br>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Leave a comment</mat-label>
+          <textarea matInput [(ngModel)]="fields.description" name="description" placeholder="Ex. It makes me feel..."></textarea>
+        </mat-form-field>
+      </form>
+
+      <div>
+          Inputs {{fields.name}}: {{fields.description}}
+      </div>
+
+</div>
+<div mat-dialog-actions>
+<button mat-raised-button color="primary" (click)="closeWithResult()">Add</button>
+  <button mat-raised-button mat-dialog-close color="secondary">Close</button>
+</div>
