@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {
   BoardStoreService,
-  BoardItem,
   Board,
 } from 'src/app/board-store.service';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -19,9 +18,9 @@ export class BoardListMainComponent implements OnInit {
   boards: Board[] | undefined = undefined;
 
   ngOnInit(): void {
-    this.store.fetchBoardList()
+    this.store.fetchBoards()
 
-    this.store.boardList.subscribe((boards: Board[]) => {
+    this.store.boards.subscribe((boards: Board[]) => {
       this.setBoardList(boards);
     });
   }

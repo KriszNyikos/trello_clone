@@ -1,0 +1,13 @@
+
+
+<mat-card *ngIf="list" [id]="uniqId" cdkDropList [cdkDropListData]="todoList" (cdkDropListDropped)="drop($event)">
+    <mat-card-title>
+        Name: {{list.name}} ({{listId}}) {{uniqId}}
+    </mat-card-title>
+
+    <mat-card-content  >
+        <div *ngFor="let todoId of list.todoIds" >
+            <app-todo-item [todoId]="todoId" cdkDrag></app-todo-item>
+        </div>
+    </mat-card-content>
+</mat-card>

@@ -1,117 +1,263 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { BoardListMainComponent } from './board-list/board-list-main/board-list-main.component';
-import { moveItemInArray } from '@angular/cdk/drag-drop';
+import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import imported from './intialData.json';
+import { ConsoleLogger } from '@angular/compiler-cli/private/localize';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BoardStoreService {
-private $boardList: BehaviorSubject<Board[]> = new BehaviorSubject([] as Board[]) 
+  private $boards: BehaviorSubject<Board[]> = new BehaviorSubject(
+    [] as Board[]
+  );
 
+  private $lists: BehaviorSubject<List[]> = new BehaviorSubject([] as List[]);
 
+  private $todos: BehaviorSubject<Todo[]> = new BehaviorSubject([] as Todo[]);
 
-  constructor() { }
+  constructor() {}
 
-  fetchBoardList(){
+  fetchBoards() {
+    let boards = localStorage.getItem('boards');
 
-    let boards = localStorage.getItem('boards')
+    if (boards) {
+      this.$boards.next(JSON.parse(boards) as Board[]);
+    }
+  }
 
-    if(boards){
-      this.$boardList.next((JSON.parse(boards) as Board[]))
+  get boards() {
+    return this.$boards.asObservable();
+  }
+
+  fetchLists() {
+    let lists = localStorage.getItem('lists');
+
+    if (lists) {
+      this.$lists.next(JSON.parse(lists) as List[]);
+    }
+  }
+
+  get lists() {
+    return this.$lists.asObservable();
+  }
+
+  fetchTodos() {
+    let todos = localStorage.getItem('boards');
+
+    if (todos) {
+      this.$todos.next(JSON.parse(todos) as Todo[]);
+    }
+  }
+
+  get todos() {
+    return this.$todos.asObservable();
+  }
+
+  deleteBoard(id: number) {
+    let list = localStorage.getItem('boards')
+      ? JSON.parse(localStorage.getItem('boards')!)
+      : undefined;
+
+    console.log('Before', list);
+
+    if (list) {
+      list = list.filter((board: Board) => {
+        return board.id !== id;
+      });
     }
 
+    console.log('After', list);
+
+    this.setBoards(list);
+    this.fetchBoards();
   }
 
-  get boardList(){
-    return this.$boardList.asObservable()
+  setInitialDatas() {
+    let { boards, todos, lists } = imported;
+
+    console.log('Initial Datas', boards, todos, lists);
+
+    if (
+      !localStorage.getItem('boards') ||
+      !localStorage.getItem('lists') ||
+      !localStorage.getItem('todos')
+    ) {
+      localStorage.clear();
+      localStorage.getItem('boards') ? undefined : this.setBoards(boards);
+      localStorage.getItem('lists') ? undefined : this.setLists(lists);
+      localStorage.getItem('todos') ? undefined : this.setTodos(todos);
+    }
   }
 
-  deleteBoard(id: number){
-    let list = localStorage.getItem('boards') ? JSON.parse(localStorage.getItem('boards')!) : undefined
+  setBoards(boardList: Board[]) {
+    localStorage.setItem('boards', JSON.stringify(boardList));
+  }
 
-    console.log('Before', list)
+  setTodos(todoList: Todo[]) {
+    localStorage.setItem('todos', JSON.stringify(todoList));
+  }
 
-    if(list){
-     list = list.filter((board: Board)=>{
-        return board.id !== id
+  setLists(listLists: List[]) {
+    localStorage.setItem('lists', JSON.stringify(listLists));
+  }
+
+  getBoardList() {
+    return localStorage.getItem('boards')
+      ? JSON.parse(localStorage.getItem('boards')!)
+      : undefined;
+  }
+
+  getBoard(id: number) {
+    console.log(
+      'Finded',
+      JSON.parse(localStorage.getItem('boards')!).find((brd: Board) => {
+        return brd.id == id;
       })
-    }
+    );
 
-    console.log('After', list)
-
-    this.setBoardsList(list)
-    this.fetchBoardList()
+    return JSON.parse(localStorage.getItem('boards')!).find(
+      (brd: Board) => brd.id == id
+    );
   }
 
+  dragNDropBoard(previousIndex: number, currentIndex: number) {
+    let list = localStorage.getItem('boards')
+      ? JSON.parse(localStorage.getItem('boards')!)
+      : undefined;
 
-  setInitialBoardList(){
-    localStorage.getItem('boards') ? undefined : this.setBoardsList(initialBoards)
-    
-  }
-
-
-
-  setBoardsList(boardList: Board[]){
-    localStorage.setItem('boards', JSON.stringify(boardList)) 
-  }
-
-  getBoardList(){
-    return localStorage.getItem('boards') ? JSON.parse(localStorage.getItem('boards')!) : undefined
-  }
-
-  dragNDropBoard(previousIndex: number, currentIndex: number){
-    let list = localStorage.getItem('boards') ? JSON.parse(localStorage.getItem('boards')!) : undefined
-
-    if(list){
+    if (list) {
       moveItemInArray(list, previousIndex, currentIndex);
     }
 
-    this.setBoardsList(list)
-    this.fetchBoardList()
-
+    this.setBoards(list);
+    this.fetchBoards();
   }
 
-  createNewBoard(name: string, description: string){
-    let list = this.getBoardList()
-    let board: Board = {id: this.createUniqueId(list), name, items : [], description,  status: "pending", created: new Date(), }
-    return board
+  dragNDropList(previousIndex: number, currentIndex: number, boardId: number) {
+    let boards = localStorage.getItem('boards')
+      ? JSON.parse(localStorage.getItem('boards')!)
+      : undefined;
+
+    boards.map((b: Board) => {
+      if (b.id === boardId) {
+        return {
+          ...b,
+          listIds: moveItemInArray(b.listIds, previousIndex, currentIndex),
+        };
+      } else {
+        return b;
+      }
+    });
+
+    this.setBoards(boards);
+    this.fetchBoards();
   }
 
-  addNewBoard(name: string, description: string){
-    let list = this.getBoardList()
-    let newBoard = this.createNewBoard(name, description)
-    list.push(newBoard)
-    this.setBoardsList(list)
-    this.fetchBoardList()
+  dragNDropTodo(
+    previousIndex: number,
+    currentIndex: number,
+    previousContainerId: string,
+    containerId: string,
+  ) {
+    let lists = localStorage.getItem('lists')
+      ? JSON.parse(localStorage.getItem('lists')!)
+      : undefined;
+
+    if (previousContainerId === containerId) {
+      lists = lists.map((l: List) => {
+        if (l.id === parseInt(containerId.split('-')[1])) {
+          return {
+            ...l,
+            listIds: moveItemInArray(l.todoIds, previousIndex, currentIndex),
+          };
+        } else {
+          return l;
+        }
+      });
+    } else {
+      let currentList = lists.find((l: List) => {
+        return l.id === parseInt(containerId.split('-')[1]);
+      });
+
+      let prevList = lists.find((l: List) => {
+        return l.id === parseInt(previousContainerId.split('-')[1]);
+      });
+
+      transferArrayItem(
+        prevList.todoIds,
+        currentList.todoIds,
+        previousIndex,
+        currentIndex
+      );
+
+      lists = lists.map((l: List) => {
+        if (l.id === parseInt(containerId.split('-')[1])) {
+          return { ...l, listIds: currentList };
+        }
+        if (l.id === parseInt(previousContainerId.split('-')[1])) {
+          return { ...l, listIds: prevList };
+        } else {
+          return l;
+        }
+      });
+
+
+    }
+    this.setLists(lists);
+    this.fetchLists();
   }
 
-  createUniqueId(list: Board[]){
-    let id = list[list.length - 1].id
+  createNewBoard(name: string, description: string) {
+    let list = this.getBoardList();
+    let board: Board = {
+      id: this.createUniqueId(list),
+      name,
+      listIds: [],
+      description,
+      status: 'pending',
+      created: new Date().toISOString().split('T')[0],
+    };
+    0;
+    return board;
+  }
 
-    let ids = list.map(board =>board.id)
-    return ids.sort()[ids.length -1] !== id ? id : id +1
+  addNewBoard(name: string, description: string) {
+    let list = this.getBoardList();
+    let newBoard = this.createNewBoard(name, description);
+    list.push(newBoard);
+    this.setBoards(list);
+    this.fetchBoards();
+  }
 
+  createUniqueId(list: Board[]) {
+    let ids = list.map((board) => board.id);
+    return ids.sort()[ids.length - 1] + 1;
   }
 }
 
-
-let initialBoards: Board[] = [
-  {id: 1, name: 'Test board1', items:[], status: 'inProgress', description: 'Lorem ipsum', created: new Date('2021-01-15')},
-  {id: 2, name: 'Test board2', items:[], status: 'inProgress', description: 'Lorem ipsum', created: new Date('2021-02-15')},
-  {id: 3, name: 'Test board3', items:[], status: 'inProgress', description: 'Lorem ipsum', created: new Date('2021-03-15')},
-  {id: 4, name: 'Test board4', items:[], status: 'inProgress', description: 'Lorem ipsum', created: new Date('2021-01-15')},
-]
-
-export interface Board{
-  id: number
-  items : BoardItem[]
-  status : 'ready' | 'inProgress' | 'failed' | 'pending'
-  name: String
-  description: String
-  created: Date
+export interface Board {
+  id: number;
+  name: string;
+  listIds: number[];
+  status: 'ready' | 'inProgress' | 'failed' | 'pending' | string;
+  description: string;
+  created: string;
 }
 
-export interface BoardItem{
+export interface List {
+  id: number;
+  name: string;
+  boardId: number;
+  todoIds: number[];
+  created: string;
+}
 
+export interface Todo {
+  id: number;
+  listId: number;
+  name: string;
+  description: string;
+  created: string;
 }

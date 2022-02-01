@@ -9,6 +9,7 @@
     flex-wrap: no-wrap;
     gap: 10px;
     overflow: auto;
+    padding: 5px
 }
 
 
@@ -27,9 +28,15 @@
   .cdk-drag-animating {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
   }
-
   
   .board-list-container.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
   }
+
+  .cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
   
+  .add-new-btn{
+    margin: 5px
+  }

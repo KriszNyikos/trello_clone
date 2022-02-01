@@ -1,1 +1,8 @@
-<p>board-main works!</p>
+<div *ngIf="board" class="board-main-body">
+    {{board.name}}
+
+    <div *ngIf="lists.length" class="list-row" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)" cdkDropListGroup>
+        <app-board-main-list *ngFor="let id of board.listIds" [listId]="id" cdkDrag></app-board-main-list>
+    </div>
+</div>  
+

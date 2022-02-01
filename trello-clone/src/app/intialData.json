@@ -1,0 +1,130 @@
+{
+  "boards": [
+    {
+      "id": 1,
+      "name": "Test board1",
+      "listIds": [1, 2, 3, 4],
+      "status": "inProgress",
+      "description": "Lorem ipsum",
+      "created": "2021-01-15"
+    },
+    {
+      "id": 2,
+      "name": "Test board2",
+      "listIds": [5, 6, 7],
+      "status": "inProgress",
+      "description": "Lorem ipsum",
+      "created": "2021-01-15"
+    },
+    {
+      "id": 3,
+      "name": "Test board3",
+      "listIds": [],
+      "status": "inProgress",
+      "description": "Lorem ipsum",
+      "created": "2021-01-15"
+    }
+  ],
+  "lists": [
+    {
+      "id": 1,
+      "name": "Todo",
+      "boardId": 1,
+      "todoIds": [1],
+      "created": "2021-01-15"
+    },
+    {
+      "id": 2,
+      "name": "In progress",
+      "boardId": 1,
+      "todoIds": [2,3],
+      "created": "2021-01-15"
+    },
+    {
+      "id": 3,
+      "name": "Done",
+      "boardId": 1,
+      "todoIds": [],
+      "created": "2021-01-15"
+    },
+    {
+      "id": 4,
+      "name": "Other",
+      "boardId": 1,
+      "todoIds": [],
+      "created": "2021-01-15"
+    },
+    {
+      "id": 5,
+      "name": "Todo",
+      "boardId": 2,
+      "todoIds": [4,5],
+      "created": "2021-01-15"
+    },
+    {
+      "id": 6,
+      "name": "In progress",
+      "boardId": 2,
+      "todoIds": [],
+      "created": "2021-01-15"
+    },
+    {
+      "id": 7,
+      "name": "Done",
+      "boardId": 2,
+      "todoIds": [7],
+      "created": "2021-01-15"
+    }
+  ],
+  "todos": [
+    {
+      "id": 1,
+      "listId": 1,
+      "name": "Test todo1",
+      "description": "Lorem ipsum....",
+      "created": "2021-01-15"
+    },
+    {
+      "id": 2,
+      "listId": 2,
+      "name": "Test todo2",
+      "description": "Lorem ipsum....",
+      "created": "2021-01-15"
+    },
+    {
+      "id": 3,
+      "listId": 2,
+      "name": "Test todo3",
+      "description": "Lorem ipsum....",
+      "created": "2021-01-15"
+    },
+    {
+      "id": 4,
+      "listId": 5,
+      "name": "Test todo4",
+      "description": "Lorem ipsum....",
+      "created": "2021-01-15"
+    },
+    {
+      "id": 5,
+      "listId": 5,
+      "name": "Test todo5",
+      "description": "Lorem ipsum....",
+      "created": "2021-01-15"
+    },
+    {
+      "id": 6,
+      "listId": 5,
+      "name": "Test todo6",
+      "description": "Lorem ipsum....",
+      "created": "2021-01-15"
+    },
+    {
+      "id": 7,
+      "listId": 7,
+      "name": "Test todo7",
+      "description": "Lorem ipsum....",
+      "created": "2021-01-15"
+    }
+  ]
+}

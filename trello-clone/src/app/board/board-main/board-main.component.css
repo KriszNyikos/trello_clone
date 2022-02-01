@@ -1,0 +1,8 @@
+.board-main-body{
+    background: rgba(255, 255, 255, 0.904);
+    height: 90vh;
+}
+
+.list-row{
+    display: flex;
+}
