@@ -103,9 +103,21 @@ export class BoardStoreService {
     localStorage.setItem('lists', JSON.stringify(listLists));
   }
 
-  getBoardList() {
+  getBoards() {
     return localStorage.getItem('boards')
       ? JSON.parse(localStorage.getItem('boards')!)
+      : undefined;
+  }
+
+  getLists() {
+    return localStorage.getItem('lists')
+      ? JSON.parse(localStorage.getItem('lists')!)
+      : undefined;
+  }
+
+  getTodos() {
+    return localStorage.getItem('todos')
+      ? JSON.parse(localStorage.getItem('todos')!)
       : undefined;
   }
 
@@ -159,7 +171,7 @@ export class BoardStoreService {
     previousIndex: number,
     currentIndex: number,
     previousContainerId: string,
-    containerId: string,
+    containerId: string
   ) {
     let lists = localStorage.getItem('lists')
       ? JSON.parse(localStorage.getItem('lists')!)
@@ -202,17 +214,55 @@ export class BoardStoreService {
           return l;
         }
       });
-
-
     }
     this.setLists(lists);
     this.fetchLists();
   }
 
+  addNewTodo(name: string, description: string, listId: number) {
+    let newTodo = this.createNewTodo(name, description, listId);
+    let newTodos = this.getTodos();
+    newTodos.push(newTodo);
+    let newList = this.getLists().reduce((acc: List[], item: List) => {
+      if (item.id === listId) {
+        item.todoIds.push(newTodo.id);
+      }
+
+      return (acc = [...acc, item]);
+    }, []);
+
+    console.log('New todos', newTodos);
+
+    this.setTodos(newTodos);
+    this.setLists(newList);
+    this.fetchTodos();
+    this.fetchLists();
+  }
+
+  addNewList(name: string, boardId: number) {
+    let newList = this.createNewList(name, boardId);
+    let lists = this.getLists();
+    lists.push(newList);
+    let boards = this.getBoards().reduce((acc: Board[], item: Board) => {
+      if (item.id === boardId) {
+        console.log('Catch', item, newList.id)
+        item.listIds.push(newList.id);
+      }
+
+      return acc = [...acc, item];
+    },[]);
+
+    this.setLists(lists)
+    this.setBoards(boards)
+    this.fetchLists()
+    this.fetchBoards()
+    console.log('Add new todo', boards, lists);
+  }
+
   createNewBoard(name: string, description: string) {
-    let list = this.getBoardList();
+    let boards = this.getBoards();
     let board: Board = {
-      id: this.createUniqueId(list),
+      id: this.createUniqueId(boards),
       name,
       listIds: [],
       description,
@@ -223,16 +273,45 @@ export class BoardStoreService {
     return board;
   }
 
+  createNewList(name: string, boardId: number) {
+    let lists = this.getLists();
+
+    let list: List = {
+      id: this.createUniqueId(lists),
+      name,
+      boardId,
+      todoIds: [],
+      created: new Date().toISOString().split('T')[0],
+    };
+    return list;
+  }
+
+  createNewTodo(name: string, description: string, listId: number) {
+    let todos = this.getTodos();
+
+    let todo: Todo = {
+      id: this.createUniqueId(todos),
+      listId,
+      name,
+      description,
+      created: new Date().toISOString().split('T')[0],
+    };
+
+    console.log('New todo', todo);
+
+    return todo;
+  }
+
   addNewBoard(name: string, description: string) {
-    let list = this.getBoardList();
+    let list = this.getBoards();
     let newBoard = this.createNewBoard(name, description);
     list.push(newBoard);
     this.setBoards(list);
     this.fetchBoards();
   }
 
-  createUniqueId(list: Board[]) {
-    let ids = list.map((board) => board.id);
+  createUniqueId(list: any[]) {
+    let ids = list.map((item) => item.id);
     return ids.sort()[ids.length - 1] + 1;
   }
 }

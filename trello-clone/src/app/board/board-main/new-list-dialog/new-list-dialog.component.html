@@ -1,18 +1,13 @@
-<h1 mat-dialog-title>Add new board</h1>
+<h1 mat-dialog-title>Add new list</h1>
 <div mat-dialog-content>
 
     <form class="new-board-form">
         <mat-form-field appearance="fill">
-          <mat-label>Board name</mat-label>
-          <input matInput [(ngModel)]="fields.name" name="name" >
+          <mat-label>List name</mat-label>
+          <input matInput [(ngModel)]="name" name="name" >
         </mat-form-field>
       
         <br>
-
-        <mat-form-field appearance="fill">
-          <mat-label>Leave a comment</mat-label>
-          <textarea matInput [(ngModel)]="fields.description" name="description" ></textarea>
-        </mat-form-field>
       </form>
 
 </div>

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BoardStoreService, Board, List, Todo } from 'src/app/board-store.service';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { ThisReceiver } from '@angular/compiler';
+import { CdkDragDrop} from '@angular/cdk/drag-drop';
+import { MatDialog } from '@angular/material/dialog';
+import { NewListDialogComponent } from './new-list-dialog/new-list-dialog.component';
 
 @Component({
   selector: 'app-board-main',
@@ -11,7 +12,7 @@ import { ThisReceiver } from '@angular/compiler';
 })
 export class BoardMainComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, public store: BoardStoreService) { }
+  constructor(private route: ActivatedRoute, public store: BoardStoreService, public dialog: MatDialog) { }
 
   board: Board | undefined = undefined
   lists: List[] = []
@@ -58,6 +59,14 @@ export class BoardMainComponent implements OnInit {
 
   drop(event: CdkDragDrop<List[]>) {
     this.store.dragNDropList(event.previousIndex, event.currentIndex, this.board!.id)
+  }
+
+  addNewListDialog(){
+    let dialogRef = this.dialog.open(NewListDialogComponent)
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.store.addNewList(result, this.board!.id)
+    });
   }
 
 

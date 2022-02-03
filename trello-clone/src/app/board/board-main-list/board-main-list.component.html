@@ -1,9 +1,14 @@
 
 
 <mat-card *ngIf="list" [id]="uniqId" cdkDropList [cdkDropListData]="todoList" (cdkDropListDropped)="drop($event)">
-    <mat-card-title>
+
+    <div>
         Name: {{list.name}} ({{listId}}) {{uniqId}}
-    </mat-card-title>
+    </div>
+
+    <div>
+        <mat-icon aria-hidden="false" aria-label="add icon" (click)="openNewTodoDialog()">add_circle_outline</mat-icon>
+    </div>
 
     <mat-card-content  >
         <div *ngFor="let todoId of list.todoIds" >
