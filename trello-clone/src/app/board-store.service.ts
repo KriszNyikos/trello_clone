@@ -60,23 +60,46 @@ export class BoardStoreService {
     return this.$todos.asObservable();
   }
 
+  getLocaleItems(){
+    let boards = localStorage.getItem('boards') ? JSON.parse(localStorage.getItem('boards')!) : undefined;
+    let lists = localStorage.getItem('lists') ? JSON.parse(localStorage.getItem('lists')!) : undefined;
+    let todos = localStorage.getItem('todos') ? JSON.parse(localStorage.getItem('todos')!) : undefined;
+
+    return {boards, lists, todos}
+  }
+
   deleteBoard(id: number) {
-    let list = localStorage.getItem('boards')
-      ? JSON.parse(localStorage.getItem('boards')!)
-      : undefined;
+    let {boards} = this.getLocaleItems()
 
-    console.log('Before', list);
-
-    if (list) {
-      list = list.filter((board: Board) => {
+    if (boards) {
+      boards = boards.filter((board: Board) => {
         return board.id !== id;
       });
     }
-
-    console.log('After', list);
-
-    this.setItems(list, 'boards');
+    this.setItems(boards, 'boards');
     this.fetchItems('boards');
+  }
+
+  deleteListById(listId: number){
+    let{boards, lists} = this.getLocaleItems()
+
+  if (lists && boards) {
+    lists = lists.filter((list: Board) => {
+      return list.id !== listId;
+    });
+
+    boards = boards.map((board: Board) => {
+      return {...board, listIds: board.listIds.filter((id: number)=> id !== listId)}
+    });
+  }
+  this.setItems(boards, 'boards')
+  this.setItems(lists, 'lists')
+  this.fetchItems('boards')
+  this.fetchItems('lists')
+  }
+
+  deleteListByBoardId(boardId: number){
+
   }
 
   setInitialDatas() {
@@ -105,35 +128,29 @@ export class BoardStoreService {
     localStorage.setItem(type, JSON.stringify(list));
   }
 
-  getItem(type: 'boards' | 'lists' | 'todos') {
-    return localStorage.getItem(type)
-      ? JSON.parse(localStorage.getItem(type)!)
-      : undefined;
-  }
 
   getBoard(id: number) {
-    return JSON.parse(localStorage.getItem('boards')!).find(
+    let {boards} = this.getLocaleItems()
+
+    return JSON.parse(boards!).find(
       (brd: Board) => brd.id == id
     );
   }
 
   dragNDropBoard(previousIndex: number, currentIndex: number) {
-    let list = localStorage.getItem('boards')
-      ? JSON.parse(localStorage.getItem('boards')!)
-      : undefined;
+    let{boards} = this.getLocaleItems()
 
-    if (list) {
-      moveItemInArray(list, previousIndex, currentIndex);
+    if (boards) {
+      moveItemInArray(boards, previousIndex, currentIndex);
     }
 
-    this.setItems(list, 'boards');
+    this.setItems(boards, 'boards');
     this.fetchItems('boards');
   }
 
   dragNDropList(previousIndex: number, currentIndex: number, boardId: number) {
-    let boards = localStorage.getItem('boards')
-      ? JSON.parse(localStorage.getItem('boards')!)
-      : undefined;
+
+    let{boards} = this.getLocaleItems()
 
     boards.map((b: Board) => {
       if (b.id === boardId) {
@@ -156,9 +173,8 @@ export class BoardStoreService {
     previousContainerId: string,
     containerId: string
   ) {
-    let lists = localStorage.getItem('lists')
-      ? JSON.parse(localStorage.getItem('lists')!)
-      : undefined;
+
+    let{lists} = this.getLocaleItems()
 
     lists =
       previousContainerId === containerId
@@ -175,6 +191,7 @@ export class BoardStoreService {
             previousIndex,
             currentIndex
           );
+
     this.setItems(lists, 'lists');
     this.fetchItems('lists');
   }
@@ -232,10 +249,11 @@ export class BoardStoreService {
   }
 
   addNewTodo(name: string, description: string, listId: number) {
+
+    let {lists, todos} = this.getLocaleItems()
     let newTodo = this.createNewTodo(name, description, listId);
-    let todoList = this.getItem('todos');
-    todoList.push(newTodo);
-    let newList = this.getItem('lists').reduce((acc: List[], item: List) => {
+    todos.push(newTodo);
+    let newList = lists.reduce((acc: List[], item: List) => {
       if (item.id === listId) {
         item.todoIds.push(newTodo.id);
       }
@@ -243,18 +261,18 @@ export class BoardStoreService {
       return (acc = [...acc, item]);
     }, []);
 
-    console.log('New todos', todoList);
+    console.log('New todos', todos);
 
-    this.setItems(todoList, 'todos');
+    this.setItems(todos, 'todos');
     this.setItems(newList, 'lists');
     this.fetchItems(['todos', 'lists']);
   }
 
   addNewList(name: string, boardId: number) {
+    let {lists, boards} = this.getLocaleItems()
     let newList = this.createNewList(name, boardId);
-    let lists = this.getItem('lists');
     lists.push(newList);
-    let boards = this.getItem('boards').reduce((acc: Board[], item: Board) => {
+    boards = boards.reduce((acc: Board[], item: Board) => {
       if (item.id === boardId) {
         console.log('Catch', item, newList.id);
         item.listIds.push(newList.id);
@@ -270,7 +288,7 @@ export class BoardStoreService {
   }
 
   createNewBoard(name: string, description: string) {
-    let boards = this.getItem('boards');
+    let {boards} = this.getLocaleItems()
     let board: Board = {
       id: this.createUniqueId(boards),
       name,
@@ -291,8 +309,7 @@ export class BoardStoreService {
   }
 
   createNewList(name: string, boardId: number) {
-    let lists = this.getItem('lists');
-
+    let {lists} = this.getLocaleItems()
     let list: List = {
       id: this.createUniqueId(lists),
       name,
@@ -304,8 +321,7 @@ export class BoardStoreService {
   }
 
   createNewTodo(name: string, description: string, listId: number) {
-    let todos = this.getItem('todos');
-
+    let{todos}= this.getLocaleItems()
     let todo: Todo = {
       id: this.createUniqueId(todos),
       listId,
@@ -320,10 +336,10 @@ export class BoardStoreService {
   }
 
   addNewBoard(name: string, description: string) {
-    let list = this.getItem('boards');
+    let {boards} = this.getLocaleItems()
     let newBoard = this.createNewBoard(name, description);
-    list.push(newBoard);
-    this.setItems(list, 'boards');
+    boards.push(newBoard);
+    this.setItems(boards, 'boards');
     this.createInitialLists(newBoard.id)
     this.fetchItems('boards');
     this.fetchItems('lists')

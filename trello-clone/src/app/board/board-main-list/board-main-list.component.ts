@@ -34,6 +34,10 @@ export class BoardMainListComponent implements OnInit {
     });
   }
 
+  deleteList(){
+    this.store.deleteListById(this.listId!)
+  }
+
   drop(event: CdkDragDrop<any[]>) {
     let { previousContainer, container, previousIndex, currentIndex } = event;
     this.store.dragNDropTodo(
