@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  BoardStoreService,
-  Board,
-} from 'src/app/board-store.service';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { BoardStoreService, Board } from 'src/app/board-store.service';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { NewBoardDialogComponent } from '../new-board-dialog/new-board-dialog.component';
 
@@ -18,7 +15,7 @@ export class BoardListMainComponent implements OnInit {
   boards: Board[] | undefined = undefined;
 
   ngOnInit(): void {
-    this.store.fetchBoards()
+    this.store.fetchItems('boards');
 
     this.store.boards.subscribe((boards: Board[]) => {
       this.setBoardList(boards);
@@ -30,27 +27,25 @@ export class BoardListMainComponent implements OnInit {
   }
 
   deleteBoard(id: number) {
-    this.store.deleteBoard(id)
+    this.store.deleteBoard(id);
   }
 
   drop(event: CdkDragDrop<Board[]>) {
     if (this.boards) {
-      this.store.dragNDropBoard(event.previousIndex, event.currentIndex)
+      this.store.dragNDropBoard(event.previousIndex, event.currentIndex);
     }
   }
 
-  newBoard(){
+  newBoard() {
     const dialogRef = this.dialog.open(NewBoardDialogComponent, {
       width: '50vw',
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      
-      if(result){
-        let {name, description} = result
-        this.store.addNewBoard(name, description)
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        let { name, description } = result;
+        this.store.addNewBoard(name, description);
       }
     });
-    
   }
 }
