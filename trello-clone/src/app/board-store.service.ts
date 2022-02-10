@@ -60,16 +60,28 @@ export class BoardStoreService {
     return this.$todos.asObservable();
   }
 
-  getLocaleItems(){
-    let boards = localStorage.getItem('boards') ? JSON.parse(localStorage.getItem('boards')!) : undefined;
-    let lists = localStorage.getItem('lists') ? JSON.parse(localStorage.getItem('lists')!) : undefined;
-    let todos = localStorage.getItem('todos') ? JSON.parse(localStorage.getItem('todos')!) : undefined;
+  getLocaleItems() {
+    let boards = localStorage.getItem('boards')
+      ? JSON.parse(localStorage.getItem('boards')!)
+      : undefined;
+    let lists = localStorage.getItem('lists')
+      ? JSON.parse(localStorage.getItem('lists')!)
+      : undefined;
+    let todos = localStorage.getItem('todos')
+      ? JSON.parse(localStorage.getItem('todos')!)
+      : undefined;
 
-    return {boards, lists, todos}
+    return { boards, lists, todos };
   }
 
   deleteBoard(id: number) {
-    let {boards} = this.getLocaleItems()
+    let { boards, lists } = this.getLocaleItems();
+
+    lists.forEach((list: List) => {
+      if (list.boardId === id) {
+        this.deleteListById(list.id);
+      }
+    });
 
     if (boards) {
       boards = boards.filter((board: Board) => {
@@ -80,32 +92,63 @@ export class BoardStoreService {
     this.fetchItems('boards');
   }
 
-  deleteListById(listId: number){
-    let{boards, lists} = this.getLocaleItems()
+  deleteListById(listId: number) {
+    let { boards, lists, todos } = this.getLocaleItems();
 
-  if (lists && boards) {
-    lists = lists.filter((list: Board) => {
-      return list.id !== listId;
+    todos.forEach((todo: Todo) => {
+      if (todo.listId === listId) {
+        this.deleteTodoById(todo.id)
+      }
     });
 
-    boards = boards.map((board: Board) => {
-      return {...board, listIds: board.listIds.filter((id: number)=> id !== listId)}
+    if (lists && boards) {
+      lists = lists.filter((list: Board) => {
+        return list.id !== listId;
+      });
+
+      boards = boards.map((board: Board) => {
+        return {
+          ...board,
+          listIds: board.listIds.filter((id: number) => id !== listId),
+        };
+      });
+    }
+
+    this.setItems(boards, 'boards');
+    this.fetchItems('boards');
+    this.setItems(lists, 'lists');
+    this.fetchItems('lists');
+  }
+
+
+  deleteTodoById(todoId: number) {
+    let {lists, todos} = this.getLocaleItems();
+
+    if(todos){
+      todos = todos.filter((todo: Todo) => {
+        return todo.id !== todoId;
+      });
+    }
+
+    lists = lists.map((list: List) => {
+      return {
+        ...list,
+        listIds: list.todoIds.filter((id: number) => id !== todoId),
+      };
     });
-  }
-  this.setItems(boards, 'boards')
-  this.setItems(lists, 'lists')
-  this.fetchItems('boards')
-  this.fetchItems('lists')
-  }
-
-  deleteListByBoardId(boardId: number){
-
+    
+    this.setItems(lists, 'lists');
+    this.fetchItems('lists');
+    this.setItems(todos, 'todos');
+    this.fetchItems('todos');
   }
 
   setInitialDatas() {
     let { boards, todos, lists } = imported;
 
     console.log('Initial Datas', boards, todos, lists);
+
+ 
 
     if (
       !localStorage.getItem('boards') ||
@@ -128,17 +171,14 @@ export class BoardStoreService {
     localStorage.setItem(type, JSON.stringify(list));
   }
 
-
   getBoard(id: number) {
-    let {boards} = this.getLocaleItems()
+    let { boards } = this.getLocaleItems();
 
-    return JSON.parse(boards!).find(
-      (brd: Board) => brd.id == id
-    );
+    return JSON.parse(boards!).find((brd: Board) => brd.id == id);
   }
 
   dragNDropBoard(previousIndex: number, currentIndex: number) {
-    let{boards} = this.getLocaleItems()
+    let { boards } = this.getLocaleItems();
 
     if (boards) {
       moveItemInArray(boards, previousIndex, currentIndex);
@@ -149,8 +189,7 @@ export class BoardStoreService {
   }
 
   dragNDropList(previousIndex: number, currentIndex: number, boardId: number) {
-
-    let{boards} = this.getLocaleItems()
+    let { boards } = this.getLocaleItems();
 
     boards.map((b: Board) => {
       if (b.id === boardId) {
@@ -173,8 +212,7 @@ export class BoardStoreService {
     previousContainerId: string,
     containerId: string
   ) {
-
-    let{lists} = this.getLocaleItems()
+    let { lists } = this.getLocaleItems();
 
     lists =
       previousContainerId === containerId
@@ -249,8 +287,7 @@ export class BoardStoreService {
   }
 
   addNewTodo(name: string, description: string, listId: number) {
-
-    let {lists, todos} = this.getLocaleItems()
+    let { lists, todos } = this.getLocaleItems();
     let newTodo = this.createNewTodo(name, description, listId);
     todos.push(newTodo);
     let newList = lists.reduce((acc: List[], item: List) => {
@@ -269,7 +306,7 @@ export class BoardStoreService {
   }
 
   addNewList(name: string, boardId: number) {
-    let {lists, boards} = this.getLocaleItems()
+    let { lists, boards } = this.getLocaleItems();
     let newList = this.createNewList(name, boardId);
     lists.push(newList);
     boards = boards.reduce((acc: Board[], item: Board) => {
@@ -288,7 +325,7 @@ export class BoardStoreService {
   }
 
   createNewBoard(name: string, description: string) {
-    let {boards} = this.getLocaleItems()
+    let { boards } = this.getLocaleItems();
     let board: Board = {
       id: this.createUniqueId(boards),
       name,
@@ -300,16 +337,16 @@ export class BoardStoreService {
     return board;
   }
 
-  createInitialLists(boardId: number){
-    let initListNames = ['Todo', 'In progress', 'Done']
+  createInitialLists(boardId: number) {
+    let initListNames = ['Todo', 'In progress', 'Done'];
 
-    initListNames.forEach((name: string)=>{
-      this.addNewList(name, boardId)
-    })
+    initListNames.forEach((name: string) => {
+      this.addNewList(name, boardId);
+    });
   }
 
   createNewList(name: string, boardId: number) {
-    let {lists} = this.getLocaleItems()
+    let { lists } = this.getLocaleItems();
     let list: List = {
       id: this.createUniqueId(lists),
       name,
@@ -321,7 +358,7 @@ export class BoardStoreService {
   }
 
   createNewTodo(name: string, description: string, listId: number) {
-    let{todos}= this.getLocaleItems()
+    let { todos } = this.getLocaleItems();
     let todo: Todo = {
       id: this.createUniqueId(todos),
       listId,
@@ -336,14 +373,13 @@ export class BoardStoreService {
   }
 
   addNewBoard(name: string, description: string) {
-    let {boards} = this.getLocaleItems()
+    let { boards } = this.getLocaleItems();
     let newBoard = this.createNewBoard(name, description);
     boards.push(newBoard);
     this.setItems(boards, 'boards');
-    this.createInitialLists(newBoard.id)
+    this.createInitialLists(newBoard.id);
     this.fetchItems('boards');
-    this.fetchItems('lists')
-    
+    this.fetchItems('lists');
   }
 
   createUniqueId(list: any[]) {

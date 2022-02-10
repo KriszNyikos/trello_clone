@@ -58,7 +58,7 @@
       "id": 5,
       "name": "Todo",
       "boardId": 2,
-      "todoIds": [4,5],
+      "todoIds": [4,5,6],
       "created": "2021-01-15"
     },
     {
