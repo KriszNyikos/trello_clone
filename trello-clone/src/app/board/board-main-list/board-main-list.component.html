@@ -13,7 +13,7 @@
 
     <mat-card-content  >
         <div *ngFor="let todoId of list.todoIds" >
-            <app-todo-item [todoId]="todoId" cdkDrag></app-todo-item>
+            <app-todo-item [id]="todoId" [todoId]="todoId" cdkDrag></app-todo-item>
         </div>
     </mat-card-content>
 </mat-card>

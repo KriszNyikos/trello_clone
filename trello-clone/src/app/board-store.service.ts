@@ -148,8 +148,6 @@ export class BoardStoreService {
 
     console.log('Initial Datas', boards, todos, lists);
 
- 
-
     if (
       !localStorage.getItem('boards') ||
       !localStorage.getItem('lists') ||
@@ -210,10 +208,11 @@ export class BoardStoreService {
     previousIndex: number,
     currentIndex: number,
     previousContainerId: string,
-    containerId: string
+    containerId: string,
+    todoId: string
   ) {
     let { lists } = this.getLocaleItems();
-
+    console.log('Container id', containerId)
     lists =
       previousContainerId === containerId
         ? this.moveTodosInOneList(
@@ -227,7 +226,8 @@ export class BoardStoreService {
             containerId,
             previousContainerId,
             previousIndex,
-            currentIndex
+            currentIndex,
+            todoId
           );
 
     this.setItems(lists, 'lists');
@@ -240,6 +240,7 @@ export class BoardStoreService {
     previousIndex: number,
     currentIndex: number
   ) {
+
     return lists.map((l: List) => {
       if (l.id === parseInt(containerId.split('-')[1])) {
         return {
@@ -257,8 +258,12 @@ export class BoardStoreService {
     containerId: string,
     previousContainerId: string,
     previousIndex: number,
-    currentIndex: number
+    currentIndex: number,
+    todoId: string
   ) {
+
+    
+    
     let currentList = lists.find((l: List) => {
       return l.id === parseInt(containerId.split('-')[1]);
     });
@@ -273,6 +278,14 @@ export class BoardStoreService {
       previousIndex,
       currentIndex
     );
+
+    let{todos} = this.getLocaleItems()
+    let newTodos = todos.map((todo: Todo)=>{
+      return (todo.id === parseInt(todoId)) ? {...todo, listId: parseInt(containerId.split('-')[1])} : todo
+    })
+
+    this.setItems(newTodos, 'todos')
+    this.fetchItems('todos')
 
     return lists.map((l: List) => {
       if (l.id === parseInt(containerId.split('-')[1])) {

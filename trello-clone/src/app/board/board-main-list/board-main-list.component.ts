@@ -40,11 +40,14 @@ export class BoardMainListComponent implements OnInit {
 
   drop(event: CdkDragDrop<any[]>) {
     let { previousContainer, container, previousIndex, currentIndex } = event;
+    let todoId =  event.item.element.nativeElement.id
+
     this.store.dragNDropTodo(
       previousIndex,
       currentIndex,
       previousContainer.element.nativeElement.id,
-      container.element.nativeElement.id
+      container.element.nativeElement.id,
+      todoId
     );
   }
 
