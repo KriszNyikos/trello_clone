@@ -1,0 +1,20 @@
+
+<div class="board-date">{{data.created | date}}</div>
+
+<div mat-dialog-title>
+{{data.name}}
+</div>
+
+<div mat-dialog-content>
+    <div>Description</div>
+    
+
+    <div>
+        {{data.description}}
+    </div>
+</div>
+
+<div mat-dialog-actions>
+    <a routerLink="/board/{{data.id}}"><button mat-dialog-close mat-raised-button color="primary">Show</button></a>
+    <button mat-button mat-dialog-close>Close</button>
+  </div>

@@ -1,4 +1,11 @@
-<mat-card *ngIf="item">
+<mat-card *ngIf="item" >
+
+    <div>
+        <mat-icon aria-hidden="false" class="info-icon" aria-label="Info icon" (click)="openInfo()">info</mat-icon>
+        <mat-icon aria-hidden="false" class="edit-icon" aria-label="Edit icon" (click)="openEdit()">edit</mat-icon>
+    </div>
+    
+
     <mat-card-subtitle>
         {{item.name}}
     </mat-card-subtitle>

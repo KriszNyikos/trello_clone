@@ -37,3 +37,4 @@ import { NewListDialogComponent } from './board-main/new-list-dialog/new-list-di
   ],
 })
 export class BoardModule {}
+

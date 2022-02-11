@@ -38,7 +38,7 @@ export class BoardListMainComponent implements OnInit {
 
   newBoard() {
     const dialogRef = this.dialog.open(NewBoardDialogComponent, {
-      width: '50vw',
+      width: '50vw', data: {edit: false}
     });
 
     dialogRef.afterClosed().subscribe((result) => {

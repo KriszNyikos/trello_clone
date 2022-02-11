@@ -395,6 +395,22 @@ export class BoardStoreService {
     this.fetchItems('lists');
   }
 
+  modifyBoard(boardId: number, fields: any){
+    let {boards}= this.getLocaleItems()
+    let {name, description} = fields
+    boards = boards.map((board: Board)=>{
+      if(board.id === boardId){
+        board.name = name
+        board.description = description
+      }
+
+      return board
+    })
+
+    this.setItems(boards, 'boards');
+    this.fetchItems('boards');
+  }
+
   createUniqueId(list: any[]) {
     let ids = list.map((item) => item.id);
     return ids.sort()[ids.length - 1] + 1;

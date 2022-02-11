@@ -11,12 +11,15 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
+import {MatIconModule} from '@angular/material/icon';
+import { BoardInfoModalComponent } from './board-info-modal/board-info-modal.component';
 
 @NgModule({
   declarations: [
     BoardListMainComponent,
     BoardListItemComponent,
     NewBoardDialogComponent,
+    BoardInfoModalComponent,
   ],
   imports: [
     CommonModule,
@@ -28,6 +31,7 @@ import { RouterModule } from '@angular/router';
     MatFormFieldModule,
     MatInputModule,
     RouterModule,
+    MatIconModule,
   ],
   exports: [BoardListMainComponent],
 })
