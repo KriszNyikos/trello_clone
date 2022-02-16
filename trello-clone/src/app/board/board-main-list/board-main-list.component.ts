@@ -30,17 +30,19 @@ export class BoardMainListComponent implements OnInit {
     this.store.lists.subscribe((lists: List[]) => {
       this.list = lists.find((list) => list.id === this.listId);
 
-      this.uniqId = this.list ? `${this.list.name}-${this.list.id}`.split(' ').join(''): ''
+      this.uniqId = this.list
+        ? `${this.list.name}-${this.list.id}`.split(' ').join('')
+        : '';
     });
   }
 
-  deleteList(){
-    this.store.deleteListById(this.listId!)
+  deleteList() {
+    this.store.deleteListById(this.listId!);
   }
 
   drop(event: CdkDragDrop<any[]>) {
     let { previousContainer, container, previousIndex, currentIndex } = event;
-    let todoId =  event.item.element.nativeElement.id
+    let todoId = event.item.element.nativeElement.id;
 
     this.store.dragNDropTodo(
       previousIndex,

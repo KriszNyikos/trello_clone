@@ -70,6 +70,19 @@ export class BoardStoreService {
     let todos = localStorage.getItem('todos')
       ? JSON.parse(localStorage.getItem('todos')!)
       : undefined;
+    // Creates nested board structure
+    // boards.map(b => (
+    //   {
+    //     ...b,
+    //     b.list = lists
+    //               .filter(l => l.boardId === b.id)
+    //               .map(t => ({
+    //                 ...l,
+    //                 todos: todos.filter(t => t.listId === l.id)
+    //               }))
+    //   }));
+
+
 
     return { boards, lists, todos };
   }
@@ -136,7 +149,7 @@ export class BoardStoreService {
         listIds: list.todoIds.filter((id: number) => id !== todoId),
       };
     });
-    
+
     this.setItems(lists, 'lists');
     this.fetchItems('lists');
     this.setItems(todos, 'todos');
@@ -262,8 +275,8 @@ export class BoardStoreService {
     todoId: string
   ) {
 
-    
-    
+
+
     let currentList = lists.find((l: List) => {
       return l.id === parseInt(containerId.split('-')[1]);
     });
@@ -415,6 +428,46 @@ export class BoardStoreService {
     let ids = list.map((item) => item.id);
     return ids.sort()[ids.length - 1] + 1;
   }
+}
+
+/*
+  export class Board {
+    id: number;
+    name: string;
+    description: string;
+    created: string;
+    lists: List[];
+  }
+
+  export class List {
+    id: number;
+    name: string;
+    boardId: number;
+    todos: Todo[];
+    created: string;
+  }
+
+  export class Todo {
+    id: number;
+    listId: number;
+    name: string;
+    description: string;
+    created: string;
+  }
+
+  fetchBoards() {
+    const boards = localStorage.getItem('boards')
+      ? JSON.parse(localStorage.getItem('boards')!)
+      : undefined;
+    const
+  }
+*/
+
+export interface Entity {
+  id: number;
+  name: string;
+  created: string;
+  description: string;
 }
 
 export interface Board {

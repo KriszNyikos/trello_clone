@@ -3,12 +3,14 @@
 <mat-card *ngIf="list" [id]="uniqId" cdkDropList [cdkDropListData]="todoList" (cdkDropListDropped)="drop($event)">
 
     <div>
-        Name: {{list.name}} ({{listId}}) {{uniqId}}
+        Name: {{list.name}}
     </div>
 
     <div>
-        <mat-icon aria-hidden="false" aria-label="add icon" (click)="openNewTodoDialog()">add_circle_outline</mat-icon>
-        <mat-icon aria-hidden="false" aria-label="add icon" (click)="deleteList()">delete</mat-icon>
+        <mat-icon aria-hidden="false" aria-label="add icon" class="icon" (click)="openNewTodoDialog()">add_circle_outline</mat-icon>
+        <mat-icon aria-hidden="false" aria-label="add icon" class="icon"  (click)="deleteList()">delete</mat-icon>
+        <mat-icon aria-hidden="false" aria-label="add icon" class="icon"  >info</mat-icon>
+        <mat-icon aria-hidden="false" aria-label="add icon" class="icon"  >edit</mat-icon>
     </div>
 
     <mat-card-content  >
