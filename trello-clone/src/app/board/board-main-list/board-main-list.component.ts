@@ -4,6 +4,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { NewTodoDialogComponent } from './new-todo-dialog/new-todo-dialog.component';
 import { ActivatedRoute } from '@angular/router';
+import { NewListDialogComponent } from '../board-main/new-list-dialog/new-list-dialog.component';
 
 @Component({
   selector: 'app-board-main-list',
@@ -11,9 +12,9 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./board-main-list.component.css'],
 })
 export class BoardMainListComponent implements OnInit {
-  @Input() public listId: number | null = null;
+  @Input() public inputList: any | undefined = undefined;
   uniqId: string = '';
-  public list: List | undefined = undefined;
+  public list: any | undefined
   public todoList: Todo[] = [];
   constructor(
     public store: BoardStoreService,
@@ -22,27 +23,20 @@ export class BoardMainListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.store.fetchItems('lists');
-    this.setLists();
+   this.list = this.inputList
+   this.uniqId = this.inputList.id
   }
 
-  setLists() {
-    this.store.lists.subscribe((lists: List[]) => {
-      this.list = lists.find((list) => list.id === this.listId);
-
-      this.uniqId = this.list
-        ? `${this.list.name}-${this.list.id}`.split(' ').join('')
-        : '';
-    });
-  }
 
   deleteList() {
-    this.store.deleteListById(this.listId!);
+    this.store.deleteList(this.list)
   }
 
   drop(event: CdkDragDrop<any[]>) {
     let { previousContainer, container, previousIndex, currentIndex } = event;
     let todoId = event.item.element.nativeElement.id;
+
+    console.log('DragNDrop todo', previousIndex, currentIndex,)
 
     this.store.dragNDropTodo(
       previousIndex,
@@ -59,7 +53,20 @@ export class BoardMainListComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       let { name, description } = result;
 
-      this.store.addNewTodo(name, description, this.listId!);
+      this.store.addNewTodo(name, description, this.list.id);
+    });
+  }
+
+  modifyListDialog(list: List) {
+
+    console.log('Modify', list)
+    
+    let dialogRef = this.dialog.open(NewListDialogComponent, {data: {list}});
+    dialogRef.afterClosed().subscribe((result) => {
+      if(result){
+        this.store.modifyList(result, list);
+      }
+     
     });
   }
 }

@@ -9,13 +9,12 @@
     <div>
         <mat-icon aria-hidden="false" aria-label="add icon" class="icon" (click)="openNewTodoDialog()">add_circle_outline</mat-icon>
         <mat-icon aria-hidden="false" aria-label="add icon" class="icon"  (click)="deleteList()">delete</mat-icon>
-        <mat-icon aria-hidden="false" aria-label="add icon" class="icon"  >info</mat-icon>
-        <mat-icon aria-hidden="false" aria-label="add icon" class="icon"  >edit</mat-icon>
+        <mat-icon aria-hidden="false" aria-label="add icon" class="icon" (click)="modifyListDialog(list)"  >edit</mat-icon>
     </div>
 
     <mat-card-content  >
-        <div *ngFor="let todoId of list.todoIds" >
-            <app-todo-item [id]="todoId" [todoId]="todoId" cdkDrag></app-todo-item>
+        <div *ngFor="let todo of list.todos" >
+            <app-todo-item [id]="todo.id" [inputTodo]="todo" cdkDrag></app-todo-item>
         </div>
     </mat-card-content>
 </mat-card>

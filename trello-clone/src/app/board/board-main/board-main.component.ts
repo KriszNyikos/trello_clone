@@ -22,34 +22,31 @@ export class BoardMainComponent implements OnInit {
     public dialog: MatDialog
   ) {}
 
-  board: Board | undefined = undefined;
+  board: any | undefined = undefined;
   lists: List[] = [];
   todos: Todo[] = [];
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
-      let { id } = params;
-
-      this.store.fetchItems(['boards', 'lists', 'todos'])
-      this.setBoard(id);
-      this.setLists(id);
+      let boardId = parseInt(params['id'])
+      this.newSetBoard(boardId)
     });
+  }
+
+  newSetBoard(boardID: number){
+
+    this.store.boards.subscribe((boards: any[] ) =>{
+      this.board = boards.find((board: any)=> board.id === boardID)
+    })
   }
 
   setBoard(id: number) {
     this.store.boards.subscribe((boards: Board[]) => {
-      let selectedBrd = boards.find((brd: Board) => brd.id == id);
+      let selectedBrd = boards.find((brd: Board) => brd.id === id);
       this.board = selectedBrd ? selectedBrd : undefined;
     });
   }
 
-  setLists(id: number) {
-    this.store.lists.subscribe((lists: List[]) => {
-      this.lists = lists.filter((ls) => {
-        return ls.boardId == id;
-      });
-    });
-  }
 
   setTodos(id: number) {
     this.store.boards.subscribe((boards: Board[]) => {
@@ -59,17 +56,24 @@ export class BoardMainComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<List[]>) {
+
+    console.log('Dragndroplist', event)
     this.store.dragNDropList(
       event.previousIndex,
       event.currentIndex,
-      this.board!.id
+      this.board?.id
     );
   }
 
   addNewListDialog() {
+    
     let dialogRef = this.dialog.open(NewListDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
-      this.store.addNewList(result, this.board!.id);
+      if(result){
+        this.store.addNewList(result, this.board);
+      }
+     
     });
   }
+
 }

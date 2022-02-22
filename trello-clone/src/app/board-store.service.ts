@@ -1,220 +1,161 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, NgModuleRef } from '@angular/core';
+import { BehaviorSubject, merge, mergeMap, of, interval, forkJoin } from 'rxjs';
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import imported from './intialData.json';
-
+import { HttpService } from './http.service';
+import { map, tap, expand } from 'rxjs/operators';
+import { textChangeRangeIsUnchanged } from 'typescript';
 @Injectable({
   providedIn: 'root',
 })
 export class BoardStoreService {
-  private $boards: BehaviorSubject<Board[]> = new BehaviorSubject(
-    [] as Board[]
-  );
+  private $boards: BehaviorSubject<any[]> = new BehaviorSubject([] as any[]);
 
-  private $lists: BehaviorSubject<List[]> = new BehaviorSubject([] as List[]);
+  private lists: List[] = [] as List[];
 
-  private $todos: BehaviorSubject<Todo[]> = new BehaviorSubject([] as Todo[]);
+  private todos: Todo[] = [] as Todo[];
 
-  constructor() {}
+  constructor(private http: HttpService) {
+    this.fetchBoards();
+    this.$boards.subscribe(console.log);
+  }
 
-  fetchItems(types: 'boards' | 'lists' | 'todos' | string[]) {
-    const setNext = (type: string) => {
-      let fetchedItem = localStorage.getItem(type);
 
-      switch (type) {
-        case 'boards':
-          this.$boards.next(JSON.parse(fetchedItem!) as Board[]);
-          break;
+  fetchBoards() {
+    this.http.apiGet('db').subscribe((db: any) => {
+      const { boards, lists, todos } = db;
 
-        case 'lists':
-          this.$lists.next(JSON.parse(fetchedItem!) as List[]);
-          break;
+      this.lists = lists.map((l: any) => new List({...l, todos: l.todoIds.map((td: any) => todos.find((t: any) => t.id == td))}))
 
-        case 'todos':
-          this.$todos.next(JSON.parse(fetchedItem!) as Todo[]);
-          break;
+      console.log('FetchBoards Lists', this.lists)
 
-        default:
-          break;
-      }
-    };
+      this.todos = todos;
 
-    if (typeof types === 'string') {
-      setNext(types);
-    } else {
-      types.forEach((type: string) => {
-        setNext(type);
-      });
-    }
+      let newBoards = this.createBoards(boards);
+
+      this.$boards.next(newBoards);
+
+      console.log('Fetch 2', this.$boards.getValue());
+    });
+  }
+
+  createBoards(boards: any) {
+    let newBoards = boards.reduce((acc: any, board: any) => {
+      acc = [...acc, new Board({...board, lists : this.createLists(board.id) })];
+
+      return acc;
+    }, []);
+
+    return newBoards.sort((a: any, b: any) => a.order - b.order);
+  }
+
+  createLists(boarId: number) {
+    let newLists = this.lists
+      .filter((l: any) => l.boardId === boarId)
+      .reduce((acc: any, l: any) => {
+        acc = [...acc, new List({...l, todos: this.createTodos(l.id)})];
+        return acc;
+      }, []);
+
+    return newLists.sort((a: any, b: any) => a.order - b.order);
+  }
+
+  createTodos(listId: number) {
+    let newTodos = this.todos
+      .filter((t: any) => t.listId === listId)
+      .reduce((acc: any, t: any) => {
+        acc = [...acc, new Todo(t)];
+        return acc;
+      }, []);
+
+    return newTodos.sort((a: any, b: any) => a.order - b.order);
   }
 
   get boards() {
     return this.$boards.asObservable();
   }
 
-  get lists() {
-    return this.$lists.asObservable();
-  }
+  deleteBoard(board: any) {
+    let requests = board.lists.reduce((acc: any, l: any) => {
+      acc = [...acc, this.http.apiDel(`lists/${l.id}`)];
+      return acc;
+    }, []);
 
-  get todos() {
-    return this.$todos.asObservable();
-  }
+    requests = [...requests, this.http.apiDel(`boards/${board.id}`)];
 
-  getLocaleItems() {
-    let boards = localStorage.getItem('boards')
-      ? JSON.parse(localStorage.getItem('boards')!)
-      : undefined;
-    let lists = localStorage.getItem('lists')
-      ? JSON.parse(localStorage.getItem('lists')!)
-      : undefined;
-    let todos = localStorage.getItem('todos')
-      ? JSON.parse(localStorage.getItem('todos')!)
-      : undefined;
-    // Creates nested board structure
-    // boards.map(b => (
-    //   {
-    //     ...b,
-    //     b.list = lists
-    //               .filter(l => l.boardId === b.id)
-    //               .map(t => ({
-    //                 ...l,
-    //                 todos: todos.filter(t => t.listId === l.id)
-    //               }))
-    //   }));
-
-
-
-    return { boards, lists, todos };
-  }
-
-  deleteBoard(id: number) {
-    let { boards, lists } = this.getLocaleItems();
-
-    lists.forEach((list: List) => {
-      if (list.boardId === id) {
-        this.deleteListById(list.id);
-      }
+    forkJoin(requests).subscribe(() => {
+      this.fetchBoards();
     });
+  }
 
-    if (boards) {
-      boards = boards.filter((board: Board) => {
-        return board.id !== id;
+  deleteList(inputList: any) {
+    this.http
+      .apiDel(`lists/${inputList.id}`)
+      .pipe(
+        mergeMap(() => {
+          let selectedBoard = this.$boards
+            .getValue()
+            .find((b: any) => b.id === inputList.boardId);
+
+          return this.http.apiPatch(`boards/${selectedBoard.id}`, {
+            listIds: selectedBoard.lists
+              .map((list: any) => list.id)
+              .filter((listId: any) => listId !== inputList.id),
+          });
+        })
+      )
+      .subscribe((res) => {
+        this.fetchBoards();
       });
-    }
-    this.setItems(boards, 'boards');
-    this.fetchItems('boards');
   }
 
-  deleteListById(listId: number) {
-    let { boards, lists, todos } = this.getLocaleItems();
+  /*deleteTodo(inputTodo: any){
 
-    todos.forEach((todo: Todo) => {
-      if (todo.listId === listId) {
-        this.deleteTodoById(todo.id)
-      }
-    });
-
-    if (lists && boards) {
-      lists = lists.filter((list: Board) => {
-        return list.id !== listId;
-      });
-
-      boards = boards.map((board: Board) => {
-        return {
-          ...board,
-          listIds: board.listIds.filter((id: number) => id !== listId),
-        };
-      });
-    }
-
-    this.setItems(boards, 'boards');
-    this.fetchItems('boards');
-    this.setItems(lists, 'lists');
-    this.fetchItems('lists');
-  }
+    this.http.apiDel(`todos/${inputTodo.id}`).pipe(
+      mergeMap(()=>{
 
 
-  deleteTodoById(todoId: number) {
-    let {lists, todos} = this.getLocaleItems();
+        let selectedList = this.lists.find((list)=> list.todos.includes(inputTodo.id))
+        console.log('Selected List', selectedList)
 
-    if(todos){
-      todos = todos.filter((todo: Todo) => {
-        return todo.id !== todoId;
-      });
-    }
+        return this.http.apiPatch()
+      })
+    )
 
-    lists = lists.map((list: List) => {
-      return {
-        ...list,
-        listIds: list.todoIds.filter((id: number) => id !== todoId),
-      };
-    });
-
-    this.setItems(lists, 'lists');
-    this.fetchItems('lists');
-    this.setItems(todos, 'todos');
-    this.fetchItems('todos');
-  }
-
-  setInitialDatas() {
-    let { boards, todos, lists } = imported;
-
-    console.log('Initial Datas', boards, todos, lists);
-
-    if (
-      !localStorage.getItem('boards') ||
-      !localStorage.getItem('lists') ||
-      !localStorage.getItem('todos')
-    ) {
-      localStorage.clear();
-      localStorage.getItem('boards')
-        ? undefined
-        : this.setItems(boards, 'boards');
-      localStorage.getItem('lists') ? undefined : this.setItems(lists, 'lists');
-      localStorage.getItem('todos') ? undefined : this.setItems(todos, 'todos');
-    }
-  }
-
-  setItems(
-    list: Board[] | Todo[] | List[],
-    type: 'boards' | 'lists' | 'todos'
-  ) {
-    localStorage.setItem(type, JSON.stringify(list));
-  }
-
-  getBoard(id: number) {
-    let { boards } = this.getLocaleItems();
-
-    return JSON.parse(boards!).find((brd: Board) => brd.id == id);
-  }
+  }*/
 
   dragNDropBoard(previousIndex: number, currentIndex: number) {
-    let { boards } = this.getLocaleItems();
+    let boards: Board[] = [...this.$boards.getValue()];
 
-    if (boards) {
-      moveItemInArray(boards, previousIndex, currentIndex);
-    }
+    moveItemInArray(boards, previousIndex, currentIndex);
 
-    this.setItems(boards, 'boards');
-    this.fetchItems('boards');
+    const apiRequests = boards.map((board: Board, index) => {
+      let body = { order: index };
+      return this.http.apiPatch(`boards/${board.id}`, body);
+    });
+
+    forkJoin(apiRequests).subscribe(() => {
+      this.fetchBoards();
+    });
   }
 
   dragNDropList(previousIndex: number, currentIndex: number, boardId: number) {
-    let { boards } = this.getLocaleItems();
+    let listsOfBoard: List[] = this.lists
+      .filter((l: List) => l.boardId === boardId)
+      .sort((a: any, b: any) => a.order - b.order);
 
-    boards.map((b: Board) => {
-      if (b.id === boardId) {
-        return {
-          ...b,
-          listIds: moveItemInArray(b.listIds, previousIndex, currentIndex),
-        };
-      } else {
-        return b;
-      }
+    moveItemInArray(listsOfBoard, previousIndex, currentIndex);
+
+    console.log('List of vboards', listsOfBoard, previousIndex, currentIndex);
+
+    const apiRequests = listsOfBoard.map((list: List, index) => {
+      let body = { order: index };
+      return this.http.apiPatch(`lists/${list.id}`, body);
     });
 
-    this.setItems(boards, 'boards');
-    this.fetchItems('boards');
+    forkJoin(apiRequests).subscribe(() => {
+      this.fetchBoards();
+    });
   }
 
   dragNDropTodo(
@@ -224,50 +165,42 @@ export class BoardStoreService {
     containerId: string,
     todoId: string
   ) {
-    let { lists } = this.getLocaleItems();
-    console.log('Container id', containerId)
-    lists =
-      previousContainerId === containerId
-        ? this.moveTodosInOneList(
-            lists,
-            containerId,
-            previousIndex,
-            currentIndex
-          )
-        : this.moveTodosToOtherList(
-            lists,
-            containerId,
-            previousContainerId,
-            previousIndex,
-            currentIndex,
-            todoId
-          );
+    if (previousContainerId === containerId) {
+      this.moveTodosInOneList(containerId, previousIndex, currentIndex);
+    } else {
+      this.moveTodosToOtherList(
+        containerId,
+        previousContainerId,
+        previousIndex,
+        currentIndex,
+        todoId
+      );
+    }
 
-    this.setItems(lists, 'lists');
-    this.fetchItems('lists');
   }
 
   moveTodosInOneList(
-    lists: any,
     containerId: string,
     previousIndex: number,
     currentIndex: number
   ) {
+    let todosofLists: Todo[] = this.todos
+      .filter((t: Todo) => t.listId === parseInt(containerId))
+      .sort((a: any, b: any) => a.order - b.order);
 
-    return lists.map((l: List) => {
-      if (l.id === parseInt(containerId.split('-')[1])) {
-        return {
-          ...l,
-          listIds: moveItemInArray(l.todoIds, previousIndex, currentIndex),
-        };
-      } else {
-        return l;
-      }
+    moveItemInArray(todosofLists, previousIndex, currentIndex);
+
+    const apiRequests = todosofLists.map((todo: Todo, index) => {
+      let body = { order: index };
+      return this.http.apiPatch(`todos/${todo.id}`, body);
+    });
+
+    forkJoin(apiRequests).subscribe(() => {
+      this.fetchBoards();
     });
   }
 
   moveTodosToOtherList(
-    lists: any,
     containerId: string,
     previousContainerId: string,
     previousIndex: number,
@@ -275,222 +208,312 @@ export class BoardStoreService {
     todoId: string
   ) {
 
-
-
-    let currentList = lists.find((l: List) => {
-      return l.id === parseInt(containerId.split('-')[1]);
+    
+    let currentList = this.lists.find((l: List) => {
+      return l.id === parseInt(containerId);
     });
 
-    let prevList = lists.find((l: List) => {
-      return l.id === parseInt(previousContainerId.split('-')[1]);
+    let prevList = this.lists.find((l: List) => {
+      return l.id === parseInt(previousContainerId);
     });
 
     transferArrayItem(
-      prevList.todoIds,
-      currentList.todoIds,
+      prevList!.todos,
+      currentList!.todos,
       previousIndex,
       currentIndex
     );
 
-    let{todos} = this.getLocaleItems()
-    let newTodos = todos.map((todo: Todo)=>{
-      return (todo.id === parseInt(todoId)) ? {...todo, listId: parseInt(containerId.split('-')[1])} : todo
-    })
+    let prevIds = prevList?.todos.map((todo: any) => todo.id);
+    let currentIds = currentList?.todos.map((todo: any) => todo.id);
 
-    this.setItems(newTodos, 'todos')
-    this.fetchItems('todos')
+    let prevTodoRequests = prevList!.todos.length ? prevList!.todos.map((todo: Todo, index) => {
+      let body = { order: index, listId: prevList!.id };
+      return this.http.apiPatch(`todos/${todo.id}`, body);
+    }) : []
 
-    return lists.map((l: List) => {
-      if (l.id === parseInt(containerId.split('-')[1])) {
-        return { ...l, listIds: currentList };
-      }
-      if (l.id === parseInt(previousContainerId.split('-')[1])) {
-        return { ...l, listIds: prevList };
-      } else {
-        return l;
-      }
-    });
+    let currentTodoRequests = currentList!.todos.length ? currentList!.todos.map((todo: Todo, index) => {
+      let body = { order: index, listId: currentList!.id };
+      return this.http.apiPatch(`todos/${todo.id}`, body);
+    }) : []
+
+    let prevListRequest = this.http.apiPatch(`lists/${prevList!.id}`, {todoIds : prevIds}) 
+    let currentListRequest = this.http.apiPatch(`lists/${currentList!.id}`, {todoIds : currentIds})
+
+    forkJoin([...prevTodoRequests, ...currentTodoRequests, prevListRequest, currentListRequest]).subscribe(()=> this.fetchBoards())
+
   }
 
-  addNewTodo(name: string, description: string, listId: number) {
-    let { lists, todos } = this.getLocaleItems();
-    let newTodo = this.createNewTodo(name, description, listId);
-    todos.push(newTodo);
-    let newList = lists.reduce((acc: List[], item: List) => {
-      if (item.id === listId) {
-        item.todoIds.push(newTodo.id);
-      }
+  addNewTodo(nme: string, dscpr: string, lid: number) {
+  
+  let newTodo = this.createNewTodo(nme, dscpr, lid)
+    let {id, name, listId, description, order, createdAt} = newTodo
 
-      return (acc = [...acc, item]);
-    }, []);
+    this.http
+      .apiPost('todos', new TodoDto({id, name, listId, description, order, createdAt}))
+      .pipe(
+        mergeMap((todo: any) => {
+          const findedList = this.lists.find((l: any) => l.id === listId)
 
-    console.log('New todos', todos);
+          let updatedList = {} as ListDto
+         
+          if(findedList){
+            let {id, name, todos, boardId, createdAt, order} = findedList
+            updatedList = new ListDto({id, name, todos: [...todos, newTodo], boardId, createdAt, order})
+          }
 
-    this.setItems(todos, 'todos');
-    this.setItems(newList, 'lists');
-    this.fetchItems(['todos', 'lists']);
+          return this.http.apiPatch(`lists/${updatedList.id}`, updatedList);
+        })
+      )
+      .subscribe((res) => {
+        this.fetchBoards();
+      });
   }
 
-  addNewList(name: string, boardId: number) {
-    let { lists, boards } = this.getLocaleItems();
-    let newList = this.createNewList(name, boardId);
-    lists.push(newList);
-    boards = boards.reduce((acc: Board[], item: Board) => {
-      if (item.id === boardId) {
-        console.log('Catch', item, newList.id);
-        item.listIds.push(newList.id);
-      }
+  addNewList(listName: string, board: any) {
+    let {id, name, createdAt, boardId, order, todos} = this.createNewList(listName, board);
+    const createdList = new ListDto({id, name, createdAt, boardId, order, todos});
+    board.lists.push(createdList)
 
-      return (acc = [...acc, item]);
-    }, []);
-
-    this.setItems(lists, 'lists');
-    this.setItems(boards, 'boards');
-    this.fetchItems(['lists', 'boards']);
-    console.log('Add new todo', boards, lists);
+    this.http
+      .apiPost(`lists`, createdList)
+      .pipe(
+        mergeMap((list: any) => {
+          return this.http.apiPatch(`boards/${board.id}`, new BoardDto(board));
+        })
+      )
+      .subscribe((res: any) => {
+        this.fetchBoards();
+      });
   }
 
   createNewBoard(name: string, description: string) {
-    let { boards } = this.getLocaleItems();
-    let board: Board = {
+    let boards = this.$boards.getValue();
+    let newBoard: Board = {
       id: this.createUniqueId(boards),
       name,
-      listIds: [],
+      lists: [],
       description,
-      status: 'pending',
-      created: new Date().toISOString().split('T')[0],
+      createdAt: new Date(),
+      order: boards.length,
     };
-    return board;
+
+    return newBoard;
   }
 
-  createInitialLists(boardId: number) {
-    let initListNames = ['Todo', 'In progress', 'Done'];
+  createNewList(name: string, board: any) {
+    let listOfLists = this.lists.filter((l: List) => l.boardId === board.id);
 
-    initListNames.forEach((name: string) => {
-      this.addNewList(name, boardId);
-    });
-  }
-
-  createNewList(name: string, boardId: number) {
-    let { lists } = this.getLocaleItems();
     let list: List = {
-      id: this.createUniqueId(lists),
+      id: this.createUniqueId(this.lists),
       name,
-      boardId,
-      todoIds: [],
-      created: new Date().toISOString().split('T')[0],
+      boardId: board.id,
+      todos: [],
+      createdAt: new Date(),
+      order: listOfLists.length,
     };
+
     return list;
   }
 
   createNewTodo(name: string, description: string, listId: number) {
-    let { todos } = this.getLocaleItems();
+    let listOfTodos = this.todos.filter((t: Todo) => t.listId === listId);
+
     let todo: Todo = {
-      id: this.createUniqueId(todos),
+      id: this.createUniqueId(this.todos),
       listId,
       name,
       description,
-      created: new Date().toISOString().split('T')[0],
+      createdAt: new Date(),
+      order: listOfTodos.length,
     };
-
-    console.log('New todo', todo);
 
     return todo;
   }
 
   addNewBoard(name: string, description: string) {
-    let { boards } = this.getLocaleItems();
     let newBoard = this.createNewBoard(name, description);
-    boards.push(newBoard);
-    this.setItems(boards, 'boards');
-    this.createInitialLists(newBoard.id);
-    this.fetchItems('boards');
-    this.fetchItems('lists');
+    let boardDto = new BoardDto(newBoard);
+    console.log('Board Dto', boardDto);
+    this.http.apiPost('boards', boardDto).subscribe((res: any) => {
+      this.fetchBoards();
+    });
   }
 
-  modifyBoard(boardId: number, fields: any){
-    let {boards}= this.getLocaleItems()
-    let {name, description} = fields
-    boards = boards.map((board: Board)=>{
-      if(board.id === boardId){
-        board.name = name
-        board.description = description
-      }
+  modifyBoard(fields: any, board: any) {
+    let { name, description } = fields;
+    let urlExt = `boards/${board.id}`;
+    this.http
+      .apiPatch(urlExt, { name, description })
+      .subscribe((response: any) => {
+        this.fetchBoards();
+      });
+  }
 
-      return board
+  modifyList(name: string, list: List){
+    console.log('Modify in service', name, list)
+
+    this.http.apiPatch(`lists/${list.id}`, {name}).subscribe((res)=>{
+      this.fetchBoards()
     })
-
-    this.setItems(boards, 'boards');
-    this.fetchItems('boards');
   }
 
-  createUniqueId(list: any[]) {
-    let ids = list.map((item) => item.id);
-    return ids.sort()[ids.length - 1] + 1;
+  createUniqueId(elements: any[]) {
+    console.log('Unique ID', elements)
+    if(elements.length){
+      return elements.sort((a: any, b: any) => a.id - b.id)[elements.length - 1].id + 1
+    } else return 1
+   
   }
 }
 
-/*
-  export class Board {
-    id: number;
-    name: string;
-    description: string;
-    created: string;
-    lists: List[];
-  }
-
-  export class List {
-    id: number;
-    name: string;
-    boardId: number;
-    todos: Todo[];
-    created: string;
-  }
-
-  export class Todo {
-    id: number;
-    listId: number;
-    name: string;
-    description: string;
-    created: string;
-  }
-
-  fetchBoards() {
-    const boards = localStorage.getItem('boards')
-      ? JSON.parse(localStorage.getItem('boards')!)
-      : undefined;
-    const
-  }
-*/
-
-export interface Entity {
+type CommonBoardType = {
   id: number;
   name: string;
-  created: string;
   description: string;
-}
+  createdAt: number | Date;
+  order: number;
+  lists: List[];
+};
 
-export interface Board {
-  id: number;
-  name: string;
-  listIds: number[];
-  status: 'ready' | 'inProgress' | 'failed' | 'pending' | string;
-  description: string;
-  created: string;
-}
-
-export interface List {
+type CommonListType = {
   id: number;
   name: string;
   boardId: number;
-  todoIds: number[];
-  created: string;
+  createdAt: number | Date;
+  order: number;
+  todos: Todo[];
+};
+
+type CommonTodoType = {
+  id: number;
+  name: string;
+  listId: number;
+  description: string;
+  createdAt: number | Date;
+  order: number;
+};
+
+export class BoardDto {
+  id;
+  name;
+  listIds;
+  description;
+  createdAt;
+  order;
+
+  constructor({
+    id,
+    name,
+    lists,
+    description,
+    createdAt,
+    order,
+  }: CommonBoardType) {
+    (this.id = id), (this.name = name);
+    this.listIds = lists.map((l: any) => l.id);
+    this.description = description;
+    this.createdAt = new Date(createdAt).valueOf();
+    this.order = order;
+  }
 }
 
-export interface Todo {
-  id: number;
-  listId: number;
-  name: string;
-  description: string;
-  created: string;
+export class Board {
+  id;
+  name;
+  lists;
+  description;
+  createdAt;
+  order;
+
+  constructor({
+    id,
+    name,
+    lists,
+    description,
+    createdAt,
+    order,
+  }: CommonBoardType) {
+    // deconstruct at creating, delete separate lists input
+
+    (this.id = id), (this.name = name);
+    this.lists = lists;
+    this.description = description;
+    this.createdAt = (typeof createdAt === 'number') ?  new Date(createdAt * 1000) : createdAt
+    this.order = order;
+  }
 }
+
+export class ListDto {
+  id;
+  name;
+  boardId;
+  todoIds;
+  createdAt;
+  order;
+
+  constructor({ id, name, boardId, todos, createdAt, order }: CommonListType) {
+    this.id = id;
+    this.name = name;
+    this.boardId = boardId;
+    this.todoIds = todos.map((t: any) => t.id);
+    this.createdAt = new Date(createdAt).valueOf();
+    this.order = order;
+  }
+}
+
+export class List {
+  id;
+  name;
+  boardId;
+  todos;
+  createdAt;
+  order;
+
+  constructor({ id, name, boardId, todos, createdAt, order }: CommonListType) {
+    this.id = id;
+    this.name = name;
+    this.boardId = boardId;
+    this.todos = todos;
+    this.createdAt = (typeof createdAt === 'number') ?  new Date(createdAt * 1000) : createdAt
+    this.order = order;
+  }
+}
+
+
+export class TodoDto {
+  id;
+  name;
+  listId;
+  createdAt;
+  description;
+  order;
+
+  constructor({id, name, listId, description, createdAt, order}: CommonTodoType) {
+    this.id = id;
+    this.name = name;
+    this.listId = listId;
+    this.description = description;
+    this.createdAt = new Date(createdAt).valueOf();
+    this.order = order;
+  }
+}
+
+export class Todo {
+  id;
+  name;
+  listId;
+  description;
+  createdAt;
+  order;
+
+  constructor({id, name, listId, description, createdAt, order}: CommonTodoType) {
+    this.id = id;
+    this.name = name;
+    this.listId = listId;
+    this.description = description;
+    this.createdAt = (typeof createdAt === 'number') ?  new Date(createdAt * 1000) : createdAt
+    this.order = order;
+  }
+}
+

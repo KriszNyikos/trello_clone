@@ -12,14 +12,14 @@ import { BoardStoreService } from 'src/app/board-store.service';
 })
 export class BoardListItemComponent implements OnInit {
   @Input() item: Board | undefined;
-  @Output() delete = new EventEmitter<number>();
+  @Output() delete = new EventEmitter<any>();
 
   constructor(public dialog: MatDialog, public store: BoardStoreService) {}
 
   ngOnInit(): void {}
 
   deleteBoard() {
-    this.delete.emit(this.item?.id);
+    this.delete.emit(this.item);
   }
 
   openInfo(){
@@ -31,12 +31,16 @@ export class BoardListItemComponent implements OnInit {
 
     dialogref.afterClosed().subscribe((result)=>{
 
-      console.log('Close', result)
-
       let {name, description} = result
 
+      
+
       if (result && (this.item!.name != name || this.item!.description != description)) {
-        this.store.modifyBoard(this.item!.id, { name, description })
+
+        this.item!.name = name
+        this.item!.description = description
+
+        this.store.modifyBoard({name, description},this.item)
       }
     })
 

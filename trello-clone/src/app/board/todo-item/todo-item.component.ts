@@ -9,9 +9,11 @@ export class TodoItemComponent implements OnInit {
 
   constructor() { }
 
-  @Input() todoId : number | null = null
+  @Input() inputTodo : any | null = null
+  public todo : any = undefined
 
   ngOnInit(): void {
+    this.todo = this.inputTodo
   }
 
 

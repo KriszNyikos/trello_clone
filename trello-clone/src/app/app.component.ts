@@ -10,7 +10,7 @@ export class AppComponent implements OnInit {
   constructor(private store: BoardStoreService) {}
 
   ngOnInit(): void {
-    this.store.setInitialDatas()
+    //this.store.setInitialDatas()
   }
 
   title = 'trello-clone';

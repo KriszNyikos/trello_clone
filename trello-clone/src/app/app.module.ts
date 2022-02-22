@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
 import { BoardModule } from './board/board.module';
 import { BoardListModule } from './board-list/board-list.module';
 import { AppComponent } from './app.component';
@@ -17,6 +18,7 @@ import { MatCardModule } from '@angular/material/card';
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     AppRoutingModule,
     BoardModule,
     BoardListModule,

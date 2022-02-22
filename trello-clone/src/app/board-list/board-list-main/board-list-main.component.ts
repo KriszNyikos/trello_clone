@@ -3,6 +3,8 @@ import { BoardStoreService, Board } from 'src/app/board-store.service';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { NewBoardDialogComponent } from '../new-board-dialog/new-board-dialog.component';
+import { mergeMap, Observable, pipe } from 'rxjs';
+
 
 @Component({
   selector: 'app-board-list-main',
@@ -12,22 +14,19 @@ import { NewBoardDialogComponent } from '../new-board-dialog/new-board-dialog.co
 export class BoardListMainComponent implements OnInit {
   constructor(public store: BoardStoreService, public dialog: MatDialog) {}
 
-  boards: Board[] | undefined = undefined;
+  boards: any[] | undefined = undefined;
 
   ngOnInit(): void {
-    this.store.fetchItems('boards');
-
-    this.store.boards.subscribe((boards: Board[]) => {
-      this.setBoardList(boards);
-    });
+    this.store.boards.subscribe((boards: any)=> this.boards = boards);
   }
 
-  setBoardList(list: Board[]) {
-    this.boards = list;
-  }
 
-  deleteBoard(id: number) {
-    this.store.deleteBoard(id);
+
+  deleteBoard(board: any) {
+
+
+    this.store.deleteBoard(board)
+
   }
 
   drop(event: CdkDragDrop<Board[]>) {
