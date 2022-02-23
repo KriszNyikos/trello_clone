@@ -48,18 +48,19 @@ export class BoardMainListComponent implements OnInit {
   }
 
   openNewTodoDialog() {
-    const dialogRef = this.dialog.open(NewTodoDialogComponent);
+    const dialogRef = this.dialog.open(NewTodoDialogComponent, {data: {todo: {name: null, description: null},modify: false}});
 
     dialogRef.afterClosed().subscribe((result) => {
-      let { name, description } = result;
 
+      if(result){
+      let { name, description } = result;
       this.store.addNewTodo(name, description, this.list.id);
+      }
+
     });
   }
 
   modifyListDialog(list: List) {
-
-    console.log('Modify', list)
     
     let dialogRef = this.dialog.open(NewListDialogComponent, {data: {list}});
     dialogRef.afterClosed().subscribe((result) => {

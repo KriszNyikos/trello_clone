@@ -17,6 +17,6 @@
 
 </div>
 <div mat-dialog-actions>
-<button mat-raised-button color="primary" (click)="closeWithResult()">Add</button>
+<button mat-raised-button color="primary" (click)="closeWithResult()">{{fields.modify ? 'Edit': 'Add'}}</button>
   <button mat-raised-button mat-dialog-close color="secondary">Close</button>
 </div>

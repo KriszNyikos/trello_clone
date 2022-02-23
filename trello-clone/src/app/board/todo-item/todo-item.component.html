@@ -2,7 +2,7 @@
     Todo id: {{todo.id}}
     Todo name: {{todo.name}}
     <div>
-        <mat-icon aria-hidden="false" aria-label="add icon" class="icon" >delete</mat-icon>
-        <mat-icon aria-hidden="false" aria-label="add icon" class="icon" >edit</mat-icon>
+        <mat-icon aria-hidden="false" aria-label="add icon" class="icon" (click)="deleteTodo()" >delete</mat-icon>
+        <mat-icon aria-hidden="false" aria-label="add icon" class="icon" (click)="modifyDialog()">edit</mat-icon>
     </div>
 </mat-card>

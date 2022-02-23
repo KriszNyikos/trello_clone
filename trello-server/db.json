@@ -1,0 +1,158 @@
+{
+  "boards": [
+    {
+      "id": 1,
+      "name": "Test board1",
+      "listIds": [
+        1,
+        2,
+        3,
+        4,
+        12,
+        14
+      ],
+      "status": "inProgress",
+      "description": "Lorem ipsum",
+      "createdAt": 1645438634278,
+      "order": 0
+    },
+    {
+      "id": 2,
+      "name": "Test board2",
+      "listIds": [
+        15
+      ],
+      "description": "asdasdasd",
+      "createdAt": 1645438634278,
+      "order": 1
+    },
+    {
+      "id": 3,
+      "name": "Test board3",
+      "listIds": [
+        13
+      ],
+      "description": "ddddddddddddddd",
+      "createdAt": 1645438634278,
+      "order": 2
+    }
+  ],
+  "lists": [
+    {
+      "id": 1,
+      "name": "Todo1",
+      "boardId": 1,
+      "todoIds": [
+        1
+      ],
+      "createdAt": 1645438634278,
+      "order": 0
+    },
+    {
+      "id": 2,
+      "name": "In progress3",
+      "boardId": 1,
+      "todoIds": [
+        2,
+        3
+      ],
+      "createdAt": 1645438634278,
+      "order": 2
+    },
+    {
+      "id": 3,
+      "name": "Done2",
+      "boardId": 1,
+      "todoIds": [],
+      "createdAt": 1645438634278,
+      "order": 1
+    },
+    {
+      "id": 4,
+      "name": "Other4",
+      "boardId": 1,
+      "todoIds": [
+        4,
+        5
+      ],
+      "createdAt": 1645438634278000,
+      "order": 3
+    },
+    {
+      "id": 12,
+      "name": "cccccccc5",
+      "boardId": 1,
+      "todoIds": [],
+      "createdAt": 1645438634278,
+      "order": 4
+    },
+    {
+      "id": 13,
+      "name": "cccccccc",
+      "boardId": 3,
+      "todoIds": [
+        4
+      ],
+      "createdAt": 1645438634278,
+      "order": 0
+    },
+    {
+      "id": 14,
+      "name": "addded habiszti",
+      "boardId": 1,
+      "todoIds": [],
+      "createdAt": 1645440975640,
+      "order": 5
+    },
+    {
+      "id": 15,
+      "name": "added babika",
+      "boardId": 2,
+      "todoIds": [],
+      "createdAt": 1645441005895,
+      "order": 0
+    }
+  ],
+  "todos": [
+    {
+      "id": 1,
+      "listId": 1,
+      "name": "Test todo1",
+      "description": "Lorem ipsum....",
+      "createdAt": 1645438634278,
+      "order": 0
+    },
+    {
+      "id": 2,
+      "listId": 2,
+      "name": "Test todo2",
+      "description": "Lorem ipsum....",
+      "createdAt": 1645438634278,
+      "order": 0
+    },
+    {
+      "id": 3,
+      "listId": 2,
+      "name": "Test todo3aaaaaaaa",
+      "description": "Lorem ipsum....",
+      "createdAt": 1645438634278,
+      "order": 1
+    },
+    {
+      "id": 4,
+      "listId": 13,
+      "name": "Test todo3",
+      "description": "Lorem ipsum....",
+      "createdAt": 1645438634278,
+      "order": 0
+    },
+    {
+      "id": 5,
+      "name": "asdasd",
+      "listId": 4,
+      "description": "asdasd",
+      "createdAt": 1645611332899,
+      "order": 0
+    }
+  ]
+}

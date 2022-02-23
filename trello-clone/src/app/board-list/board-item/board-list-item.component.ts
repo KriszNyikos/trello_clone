@@ -22,28 +22,31 @@ export class BoardListItemComponent implements OnInit {
     this.delete.emit(this.item);
   }
 
-  openInfo(){
-    this.dialog.open(BoardInfoModalComponent,{ width: '50%', data: this.item})
+  openInfo() {
+    this.dialog.open(BoardInfoModalComponent, {
+      width: '50%',
+      data: this.item,
+    });
   }
 
-  openEdit(){
-    let dialogref = this.dialog.open(NewBoardDialogComponent, { width: '50%', data: {edit: true, board: this.item}})
+  openEdit() {
+    let dialogref = this.dialog.open(NewBoardDialogComponent, {
+      width: '50%',
+      data: { edit: true, board: this.item },
+    });
 
-    dialogref.afterClosed().subscribe((result)=>{
+    dialogref.afterClosed().subscribe((result) => {
+      let { name, description } = result;
 
-      let {name, description} = result
+      if (
+        result &&
+        (this.item!.name != name || this.item!.description != description)
+      ) {
+        this.item!.name = name;
+        this.item!.description = description;
 
-      
-
-      if (result && (this.item!.name != name || this.item!.description != description)) {
-
-        this.item!.name = name
-        this.item!.description = description
-
-        this.store.modifyBoard({name, description},this.item)
+        this.store.modifyBoard({ name, description }, this.item);
       }
-    })
-
-
+    });
   }
 }

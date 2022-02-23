@@ -109,20 +109,27 @@ export class BoardStoreService {
       });
   }
 
-  /*deleteTodo(inputTodo: any){
+  deleteTodo(inputTodo: Todo){
+
 
     this.http.apiDel(`todos/${inputTodo.id}`).pipe(
       mergeMap(()=>{
+        let newListOfTodoIds = this.lists.find((list)=> list.id === inputTodo.listId)!.todos.reduce((acc: number[], todo: any)=>{
+          if(todo.id !== inputTodo.id){
+            acc = [...acc, todo.id]
+          }
+          return acc
+        },[])
 
+        console.log("new ids", newListOfTodoIds)
 
-        let selectedList = this.lists.find((list)=> list.todos.includes(inputTodo.id))
-        console.log('Selected List', selectedList)
-
-        return this.http.apiPatch()
+        return this.http.apiPatch(`lists/${inputTodo.listId}`, {todoIds: newListOfTodoIds})
       })
-    )
+    ).subscribe((res)=>{
+      this.fetchBoards()
+    })
 
-  }*/
+  }
 
   dragNDropBoard(previousIndex: number, currentIndex: number) {
     let boards: Board[] = [...this.$boards.getValue()];
@@ -351,9 +358,15 @@ export class BoardStoreService {
   }
 
   modifyList(name: string, list: List){
-    console.log('Modify in service', name, list)
-
     this.http.apiPatch(`lists/${list.id}`, {name}).subscribe((res)=>{
+      this.fetchBoards()
+    })
+  }
+
+  modifyTodo(field: {name: string, description: string}, todo: Todo){
+    let {name, description} = field
+
+    this.http.apiPatch(`todos/${todo.id}`, {name, description}).subscribe(()=>{
       this.fetchBoards()
     })
   }
