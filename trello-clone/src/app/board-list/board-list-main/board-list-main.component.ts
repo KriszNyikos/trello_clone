@@ -35,7 +35,8 @@ export class BoardListMainComponent implements OnInit {
     }
   }
 
-  newBoard() {
+  newBoard(event: any) {
+    event.stopPropagation()
     const dialogRef = this.dialog.open(NewBoardDialogComponent, {
       width: '50vw', data: {edit: false}
     });

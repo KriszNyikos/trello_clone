@@ -28,7 +28,8 @@ export class BoardMainListComponent implements OnInit {
   }
 
 
-  deleteList() {
+  deleteList(event: any) {
+    event.stopPropagation()
     this.store.deleteList(this.list)
   }
 
@@ -47,7 +48,8 @@ export class BoardMainListComponent implements OnInit {
     );
   }
 
-  openNewTodoDialog() {
+  openNewTodoDialog(event: any) {
+    event.stopPropagation()
     const dialogRef = this.dialog.open(NewTodoDialogComponent, {data: {todo: {name: null, description: null},modify: false}});
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -60,9 +62,9 @@ export class BoardMainListComponent implements OnInit {
     });
   }
 
-  modifyListDialog(list: List) {
-    
-    let dialogRef = this.dialog.open(NewListDialogComponent, {data: {list}});
+  modifyListDialog(event: any,list: List) {
+    event.stopPropagation()
+    let dialogRef = this.dialog.open(NewListDialogComponent, {data: {listName: this.list.name, isEdit: true}});
     dialogRef.afterClosed().subscribe((result) => {
       if(result){
         this.store.modifyList(result, list);

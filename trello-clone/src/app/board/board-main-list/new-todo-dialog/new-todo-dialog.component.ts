@@ -21,6 +21,4 @@ export class NewTodoDialogComponent{
   closeWithResult(){
     this.dialogRef.close(this.fields)
   }
-
-
 }

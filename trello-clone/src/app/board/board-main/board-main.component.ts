@@ -65,9 +65,9 @@ export class BoardMainComponent implements OnInit {
     );
   }
 
-  addNewListDialog() {
-    
-    let dialogRef = this.dialog.open(NewListDialogComponent);
+  addNewListDialog(event: any) {
+    event.stopPropagation()
+    let dialogRef = this.dialog.open(NewListDialogComponent, {data: {name: '', isEdit: false}});
     dialogRef.afterClosed().subscribe((result) => {
       if(result){
         this.store.addNewList(result, this.board);

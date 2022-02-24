@@ -18,18 +18,21 @@ export class BoardListItemComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  deleteBoard() {
+  deleteBoard(event: any) {
+    event.stopPropagation()
     this.delete.emit(this.item);
   }
 
-  openInfo() {
+  openInfo(event: any) {
+    event.stopPropagation()
     this.dialog.open(BoardInfoModalComponent, {
       width: '50%',
       data: this.item,
     });
   }
 
-  openEdit() {
+  openEdit(event: any) {
+    event.stopPropagation()
     let dialogref = this.dialog.open(NewBoardDialogComponent, {
       width: '50%',
       data: { edit: true, board: this.item },

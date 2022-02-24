@@ -14,6 +14,8 @@ import { TodoItemComponent } from './todo-item/todo-item.component';
 import { BoardMainListComponent } from './board-main-list/board-main-list.component';
 import { NewTodoDialogComponent } from './board-main-list/new-todo-dialog/new-todo-dialog.component';
 import { NewListDialogComponent } from './board-main/new-list-dialog/new-list-dialog.component';
+import {MatListModule} from '@angular/material/list';
+import { MoveToDialogComponent } from './move-to-dialog/move-to-dialog.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +24,7 @@ import { NewListDialogComponent } from './board-main/new-list-dialog/new-list-di
     BoardMainListComponent,
     NewTodoDialogComponent,
     NewListDialogComponent,
+    MoveToDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -34,6 +37,7 @@ import { NewListDialogComponent } from './board-main/new-list-dialog/new-list-di
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    MatListModule,
   ],
 })
 export class BoardModule {}

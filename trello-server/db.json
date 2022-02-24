@@ -53,7 +53,6 @@
       "name": "In progress3",
       "boardId": 1,
       "todoIds": [
-        2,
         3
       ],
       "createdAt": 1645438634278,
@@ -63,7 +62,9 @@
       "id": 3,
       "name": "Done2",
       "boardId": 1,
-      "todoIds": [],
+      "todoIds": [
+        2
+      ],
       "createdAt": 1645438634278,
       "order": 1
     },
@@ -72,10 +73,9 @@
       "name": "Other4",
       "boardId": 1,
       "todoIds": [
-        4,
-        5
+        4
       ],
-      "createdAt": 1645438634278000,
+      "createdAt": 1645438634278,
       "order": 3
     },
     {
@@ -124,7 +124,7 @@
     },
     {
       "id": 2,
-      "listId": 2,
+      "listId": 3,
       "name": "Test todo2",
       "description": "Lorem ipsum....",
       "createdAt": 1645438634278,
@@ -133,10 +133,10 @@
     {
       "id": 3,
       "listId": 2,
-      "name": "Test todo3aaaaaaaa",
+      "name": "Test todo3",
       "description": "Lorem ipsum....",
       "createdAt": 1645438634278,
-      "order": 1
+      "order": 0
     },
     {
       "id": 4,
@@ -144,14 +144,6 @@
       "name": "Test todo3",
       "description": "Lorem ipsum....",
       "createdAt": 1645438634278,
-      "order": 0
-    },
-    {
-      "id": 5,
-      "name": "asdasd",
-      "listId": 4,
-      "description": "asdasd",
-      "createdAt": 1645611332899,
       "order": 0
     }
   ]

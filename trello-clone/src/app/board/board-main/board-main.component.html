@@ -2,7 +2,7 @@
     {{board.name}}
 
     <div>
-        <button mat-stroked-button (click)="addNewListDialog()">Add new list</button>
+        <button mat-stroked-button (click)="addNewListDialog($event)">Add new list</button>
     </div>
 
     <div *ngIf="board.lists.length" class="list-row" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="drop($event)" cdkDropListGroup>

@@ -110,8 +110,6 @@ export class BoardStoreService {
   }
 
   deleteTodo(inputTodo: Todo){
-
-
     this.http.apiDel(`todos/${inputTodo.id}`).pipe(
       mergeMap(()=>{
         let newListOfTodoIds = this.lists.find((list)=> list.id === inputTodo.listId)!.todos.reduce((acc: number[], todo: any)=>{

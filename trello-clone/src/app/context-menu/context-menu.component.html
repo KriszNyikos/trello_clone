@@ -1,0 +1,29 @@
+
+<mat-dialog-content>
+        <mat-selection-list #selection [multiple]="false" >
+          <mat-list-option [value]="'delete'" (click)="deleteTodo($event)">
+            <div style="display: flex; align-items: center" >
+              <mat-icon aria-hidden="false" aria-label="add icon" class="icon"
+                >delete</mat-icon
+              >
+              <div>Delete</div>
+            </div>
+          </mat-list-option>
+          <mat-list-option [value]="'modify'" (click)="modifyTodo($event)">
+            <div style="display: flex; align-items: center">
+              <mat-icon aria-hidden="false" aria-label="add icon" class="icon"
+                >edit</mat-icon
+              >
+              <div>Modify</div>
+            </div>
+          </mat-list-option>
+          <mat-list-option [value]="'oList'" (click)="moveToList($event)"
+            >Move to other list
+            </mat-list-option
+          >
+          <mat-list-option [value]="'oBoard'" (click)="moveToBoard($event)"
+            >Move to other board</mat-list-option
+          >
+        </mat-selection-list>
+</mat-dialog-content>
+

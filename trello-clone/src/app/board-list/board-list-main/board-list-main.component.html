@@ -8,6 +8,6 @@
                 <app-board-item *ngFor="let item of store.boards | async" cdkDrag  [item]="item" (delete)="deleteBoard($event)" ></app-board-item>
         </div>
 
-        <button mat-raised-button class="add-new-btn" color="primary" (click)="newBoard()">Add new board</button>
+        <button mat-raised-button class="add-new-btn" color="primary" (click)="newBoard($event)">Add new board</button>
     </div>
 </div>
