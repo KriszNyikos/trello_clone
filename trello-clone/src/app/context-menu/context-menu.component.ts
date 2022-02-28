@@ -12,7 +12,7 @@ import { MoveToDialogComponent } from '../board/move-to-dialog/move-to-dialog.co
 })
 export class ContextMenuComponent implements OnInit{
 
-  constructor(public store: BoardStoreService, @Inject(MAT_DIALOG_DATA) public data: Todo, public dialog: MatDialog) { }
+  constructor(public store: BoardStoreService, @Inject(MAT_DIALOG_DATA) public todo: Todo, public dialog: MatDialog) { }
   public isOpen: boolean = false
 
 
@@ -21,7 +21,7 @@ export class ContextMenuComponent implements OnInit{
 
   deleteTodo(event: any){
     event.stopPropagation()
-    this.store.deleteTodo(this.data)
+    this.store.deleteTodo(this.todo)
     this.dialog.closeAll()
   }
 
@@ -29,20 +29,21 @@ export class ContextMenuComponent implements OnInit{
   //Subsciption type 
   modifyTodo(event: any){
     event.stopPropagation()
-    this.dialog.open(NewTodoDialogComponent, {data: {todo: this.data, modify: true}})
+    this.dialog.open(NewTodoDialogComponent, {data: {todo: this.todo, modify: true}})
     .afterClosed().subscribe((res)=>{
-      this.store.modifyTodo(res, this.data)
+      this.store.modifyTodo(res, this.todo)
       this.dialog.closeAll()
     })
   }
 
   moveToList(event: any){
     event.stopPropagation()
-    this.dialog.open(MoveToDialogComponent)
+    this.dialog.open(MoveToDialogComponent, {data:  {todo: this.todo, type: 'toList'}})
   }
 
   moveToBoard(event: any){
-
+    event.stopPropagation()
+    this.dialog.open(MoveToDialogComponent, {data:  {todo: this.todo, type: 'toBoard'}})
   }
 
 }

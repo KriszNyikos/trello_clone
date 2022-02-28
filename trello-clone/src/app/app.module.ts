@@ -5,6 +5,7 @@ import { BoardModule } from './board/board.module';
 import { BoardListModule } from './board-list/board-list.module';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NavigationComponent } from './navigation/navigation.component';
 import { MatCardModule } from '@angular/material/card';
@@ -33,7 +34,8 @@ import { MoveToDialogzComponent } from './move-to-dialogz/move-to-dialogz.compon
     MatCardModule,
     MatListModule,
     MatIconModule,
-    MatDialogModule
+    MatDialogModule,
+    RouterModule
   ],
   providers: [],
   bootstrap: [AppComponent]

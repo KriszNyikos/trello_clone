@@ -1,1 +1,40 @@
-<p>move-to-dialog works!</p>
+<mat-dialog-content *ngIf="type === 'toList'">
+    <mat-form-field appearance="fill">
+        <mat-label>Select list</mat-label>
+        <mat-select [(value)]="toListFields.selectedListId">
+          <mat-option *ngFor="let list of toListFields.lists" [value]="list.id">
+            {{list.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-content *ngIf="type === 'toBoard'">
+    <mat-form-field appearance="fill">
+        <mat-label>Select board</mat-label>
+        <mat-select [(value)]="toBoardFields.selectedBoardId" (selectionChange)="changeListOfBoards()">
+          <mat-option *ngFor="let board of toBoardFields.boards" [value]="board.id">
+            {{board.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Select list</mat-label>
+        <mat-select [(value)]="toBoardFields.selectedListId">
+          <mat-option *ngFor="let list of toBoardFields.lists" [value]="list.id">
+            {{list.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+    <button *ngIf="type === 'toList'" mat-raised-button [disabled]="!toListFields.selectedListId" (click)="moveTodoToList()">Move to list</button>
+    <button  *ngIf="type === 'toBoard'" mat-raised-button [disabled]="!toBoardFields.selectedBoardId || !toBoardFields.selectedListId" (click)="moveTodOtherBoard()">Move to board</button>
+</mat-dialog-actions>
+
+
+
+
+

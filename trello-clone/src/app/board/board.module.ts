@@ -16,6 +16,7 @@ import { NewTodoDialogComponent } from './board-main-list/new-todo-dialog/new-to
 import { NewListDialogComponent } from './board-main/new-list-dialog/new-list-dialog.component';
 import {MatListModule} from '@angular/material/list';
 import { MoveToDialogComponent } from './move-to-dialog/move-to-dialog.component';
+import {MatSelectModule} from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { MoveToDialogComponent } from './move-to-dialog/move-to-dialog.component
     MatInputModule,
     MatIconModule,
     MatListModule,
+    MatSelectModule,
   ],
 })
 export class BoardModule {}
