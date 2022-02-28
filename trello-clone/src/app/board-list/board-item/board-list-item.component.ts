@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
 import { Board } from 'src/app/board-store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { BoardInfoModalComponent } from '../board-info-modal/board-info-modal.component';
@@ -9,6 +9,7 @@ import { BoardStoreService } from 'src/app/board-store.service';
   selector: 'app-board-item',
   templateUrl: './board-list-item.component.html',
   styleUrls: ['./board-list-item.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class BoardListItemComponent implements OnInit {
   @Input() item: Board | undefined;

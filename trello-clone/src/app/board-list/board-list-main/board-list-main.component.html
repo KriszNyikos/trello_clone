@@ -1,13 +1,8 @@
 <div class="board-list-body list-boundary">
-    <h3>
-        Board list box
-    </h3>
-    
+    <button mat-raised-button class="add-new-btn" color="primary" (click)="newBoard($event)">Add new board</button>
     <div *ngIf='boards'>
         <div class="board-list-container" cdkDropListOrientation="horizontal"  cdkDropList (cdkDropListDropped)="drop($event)">
                 <app-board-item *ngFor="let item of store.boards | async" cdkDrag  [item]="item" (delete)="deleteBoard($event)" ></app-board-item>
         </div>
-
-        <button mat-raised-button class="add-new-btn" color="primary" (click)="newBoard($event)">Add new board</button>
     </div>
 </div>

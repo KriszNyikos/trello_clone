@@ -1,3 +1,7 @@
 .icon{
     cursor: pointer
 }
+
+.main-list-body{
+    width: 200px;
+}
